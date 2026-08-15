@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "444130072150",
+    "project_id": "soulspace-410a9",
+    "storage_bucket": "soulspace-410a9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444130072150:android:471622bc50e0a5ebeccdf7",
+        "android_client_info": {
+          "package_name": "com.example.soulspace"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAaiOZcK5udM4VV8T8zo0hLxJUvou9Fuwk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

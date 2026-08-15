@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F0"
+    android:padding="24dp">
+
+    <!-- Header -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginBottom="32dp">
+
+        <TextView
+            android:id="@+id/tvBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="← Назад"
+            android:textSize="14sp"
+            android:textColor="#5C5470"
+            android:layout_centerVertical="true"
+            android:clickable="true"
+            android:focusable="true"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Записка дня"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#2D2D2D"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
+
+    <!-- Incoming message block -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="СООБЩЕНИЕ ОТ ПАРТНЁРА"
+        android:textSize="10sp"
+        android:textColor="#A0A0A0"
+        android:letterSpacing="0.1"
+        android:layout_marginBottom="8dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/social_button_background"
+        android:padding="16dp"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/tvPartnerMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Сообщений пока нет"
+            android:textSize="15sp"
+            android:textColor="#2D2D2D"
+            android:lineSpacingMultiplier="1.4"/>
+
+        <TextView
+            android:id="@+id/tvPartnerMessageTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="11sp"
+            android:textColor="#A0A0A0"
+            android:layout_marginTop="6dp"/>
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#EAEAE4"
+        android:layout_marginVertical="24dp"/>
+
+    <!-- Outgoing message block -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ВАША ЗАПИСКА"
+        android:textSize="10sp"
+        android:textColor="#A0A0A0"
+        android:letterSpacing="0.1"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- Already sent block -->
+    <LinearLayout
+        android:id="@+id/layoutAlreadySent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/social_button_background"
+        android:padding="16dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvMyMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:textColor="#2D2D2D"
+            android:lineSpacingMultiplier="1.4"/>
+
+        <TextView
+            android:id="@+id/tvMyMessageTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="11sp"
+            android:textColor="#A0A0A0"
+            android:layout_marginTop="6dp"/>
+    </LinearLayout>
+
+    <!-- Input block -->
+    <LinearLayout
+        android:id="@+id/layoutInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:background="@drawable/input_background"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <EditText
+                android:id="@+id/etMessage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="Напиши что-нибудь тёплое..."
+                android:textSize="14sp"
+                android:textColor="#2D2D2D"
+                android:background="@null"
+                android:inputType="textMultiLine"
+                android:gravity="top"
+                android:maxLength="200"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvCharCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0/200"
+            android:textSize="11sp"
+            android:textColor="#A0A0A0"
+            android:layout_gravity="end"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/btnSend"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Отправить записку  ✉"
+            android:textSize="14sp"
+            android:textColor="#4A4560"
+            android:background="@drawable/button_background"
+            android:stateListAnimator="@null"/>
+    </LinearLayout>
+
+    <!-- Timer until reset -->
+    <TextView
+        android:id="@+id/tvResetTimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="12sp"
+        android:textColor="#A0A0A0"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="12dp"
+        android:gravity="center"/>
+
+</LinearLayout>

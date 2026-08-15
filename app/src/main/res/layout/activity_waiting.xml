@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#F5F5F0"
+    android:paddingHorizontal="32dp">
+
+    <!-- Avatar with phone mockup -->
+    <FrameLayout
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginBottom="32dp">
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:background="@drawable/avatar_circle_background"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_person_placeholder"/>
+
+
+    </FrameLayout>
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ожидание\nподтверждения"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="#1A1A1A"
+        android:gravity="center"
+        android:fontFamily="serif"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Subtitle -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Мы отправили приглашение вашему партнёру. Связь будет установлена, как только оно будет принято."
+        android:textSize="14sp"
+        android:textColor="#8A8A8A"
+        android:gravity="center"
+        android:lineSpacingMultiplier="1.4"
+        android:layout_marginBottom="48dp"/>
+
+    <!-- Cancel Button -->
+    <LinearLayout
+        android:id="@+id/btnCancelInvite"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:orientation="horizontal"
+        android:background="@drawable/cancel_button_background"
+        android:gravity="center"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✕"
+            android:textSize="14sp"
+            android:textColor="#8A8A8A"
+            android:paddingEnd="8dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Отменить приглашение"
+            android:textSize="14sp"
+            android:textColor="#8A8A8A"/>
+    </LinearLayout>
+
+</LinearLayout>
