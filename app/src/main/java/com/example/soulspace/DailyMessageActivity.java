@@ -5,10 +5,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,12 +39,20 @@ public class DailyMessageActivity extends AppCompatActivity {
     private Button btnSend;
     private LinearLayout layoutAlreadySent, layoutInput;
 
+    // NEW: loading state views
+    private View contentContainer;
+    private ProgressBar progressLoading;
+
     private DatabaseReference db;
     private String currentUserId;
     private String partnerId;
     private ValueEventListener partnerMessageListener;
     private Handler timerHandler = new Handler();
     private Runnable timerRunnable;
+
+    // NEW: track whether each async piece has finished at least once
+    private boolean myMessageReady = false;
+    private boolean partnerMessageReady = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +67,7 @@ public class DailyMessageActivity extends AppCompatActivity {
         db = FirebaseDatabase.getInstance().getReference();
 
         initViews();
+        showLoading(); // NEW: hide content until everything is ready
         loadPartnerId();
         setListeners();
     }
@@ -74,6 +85,10 @@ public class DailyMessageActivity extends AppCompatActivity {
         layoutAlreadySent = findViewById(R.id.layoutAlreadySent);
         layoutInput = findViewById(R.id.layoutInput);
 
+        // NEW — must exist in activity_daily_message.xml
+        contentContainer = findViewById(R.id.contentContainer);
+        progressLoading = findViewById(R.id.progressLoading);
+
         etMessage.setOnClickListener(v -> {
             etMessage.requestFocus();
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -87,6 +102,24 @@ public class DailyMessageActivity extends AppCompatActivity {
             }
             @Override public void afterTextChanged(Editable s) {}
         });
+    }
+
+    // NEW: loading state helpers
+    private void showLoading() {
+        contentContainer.setVisibility(View.INVISIBLE);
+        progressLoading.setVisibility(View.VISIBLE);
+    }
+
+    private void showContent() {
+        progressLoading.setVisibility(View.GONE);
+        contentContainer.setVisibility(View.VISIBLE);
+    }
+
+    // NEW: called after each async piece finishes; reveals content once both are ready
+    private void checkIfReadyToShow() {
+        if (myMessageReady && partnerMessageReady) {
+            showContent();
+        }
     }
 
     private void loadPartnerId() {
@@ -112,7 +145,12 @@ public class DailyMessageActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError error) {}
+                    public void onCancelled(DatabaseError error) {
+                        // NEW: don't leave user stuck on loader forever
+                        myMessageReady = true;
+                        partnerMessageReady = true;
+                        checkIfReadyToShow();
+                    }
                 });
     }
 
@@ -123,6 +161,8 @@ public class DailyMessageActivity extends AppCompatActivity {
                     public void onDataChange(DataSnapshot snapshot) {
                         if (!snapshot.exists()) {
                             showInputMode();
+                            myMessageReady = true; // NEW
+                            checkIfReadyToShow();  // NEW
                             return;
                         }
 
@@ -131,6 +171,8 @@ public class DailyMessageActivity extends AppCompatActivity {
 
                         if (sentAt == null) {
                             showInputMode();
+                            myMessageReady = true; // NEW
+                            checkIfReadyToShow();  // NEW
                             return;
                         }
 
@@ -145,15 +187,24 @@ public class DailyMessageActivity extends AppCompatActivity {
                             // Сообщение ещё активно
                             showSentMode(text, sentAt, dayInMs - (now - sentAt));
                         }
+                        myMessageReady = true; // NEW
+                        checkIfReadyToShow();  // NEW
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError error) {}
+                    public void onCancelled(DatabaseError error) {
+                        myMessageReady = true; // NEW
+                        checkIfReadyToShow();  // NEW
+                    }
                 });
     }
 
     private void listenPartnerMessage() {
-        if (partnerId == null) return;
+        if (partnerId == null) {
+            partnerMessageReady = true; // NEW
+            checkIfReadyToShow();       // NEW
+            return;
+        }
 
         partnerMessageListener = new ValueEventListener() {
             @Override
@@ -161,13 +212,19 @@ public class DailyMessageActivity extends AppCompatActivity {
                 if (!snapshot.exists()) {
                     tvPartnerMessage.setText("Партнёр ещё не отправил записку сегодня");
                     tvPartnerMessageTime.setText("");
+                    partnerMessageReady = true; // NEW
+                    checkIfReadyToShow();       // NEW
                     return;
                 }
 
                 String text = snapshot.child("text").getValue(String.class);
                 Long sentAt = snapshot.child("sentAt").getValue(Long.class);
 
-                if (sentAt == null) return;
+                if (sentAt == null) {
+                    partnerMessageReady = true; // NEW
+                    checkIfReadyToShow();       // NEW
+                    return;
+                }
 
                 long now = System.currentTimeMillis();
                 long dayInMs = 24 * 60 * 60 * 1000L;
@@ -179,10 +236,15 @@ public class DailyMessageActivity extends AppCompatActivity {
                     tvPartnerMessage.setText(text);
                     tvPartnerMessageTime.setText("Отправлено " + formatTime(sentAt));
                 }
+                partnerMessageReady = true; // NEW
+                checkIfReadyToShow();       // NEW
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {}
+            public void onCancelled(DatabaseError error) {
+                partnerMessageReady = true; // NEW
+                checkIfReadyToShow();       // NEW
+            }
         };
 
         db.child("daily_messages").child(partnerId)
@@ -190,14 +252,14 @@ public class DailyMessageActivity extends AppCompatActivity {
     }
 
     private void showInputMode() {
-        layoutInput.setVisibility(android.view.View.VISIBLE);
-        layoutAlreadySent.setVisibility(android.view.View.GONE);
+        layoutInput.setVisibility(View.VISIBLE);
+        layoutAlreadySent.setVisibility(View.GONE);
         tvResetTimer.setText("");
     }
 
     private void showSentMode(String text, long sentAt, long msLeft) {
-        layoutInput.setVisibility(android.view.View.GONE);
-        layoutAlreadySent.setVisibility(android.view.View.VISIBLE);
+        layoutInput.setVisibility(View.GONE);
+        layoutAlreadySent.setVisibility(View.VISIBLE);
         tvMyMessage.setText(text);
         tvMyMessageTime.setText("Отправлено " + formatTime(sentAt));
 
