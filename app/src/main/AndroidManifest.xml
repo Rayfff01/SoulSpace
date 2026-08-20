@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SoulSpace">
         <activity
+            android:name=".CalendarActivity"
+            android:exported="false" />
+        <activity
             android:name=".DailyMessageActivity"
             android:exported="false" />
         <activity

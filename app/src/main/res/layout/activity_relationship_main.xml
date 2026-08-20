@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:background="#F5F5F0">
 
-    <!-- Top Bar -->
+    <!-- Top Bar (виден сразу, до загрузки данных) -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
@@ -39,413 +39,431 @@
             android:scaleType="centerCrop"/>
     </RelativeLayout>
 
-    <ScrollView
+    <!-- NEW: обёртка, чтобы ProgressBar мог лежать по центру поверх скролла с контентом -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:showDividers="none">
+        android:layout_weight="1">
 
-        <LinearLayout
+        <!-- NEW: сам ScrollView теперь contentContainer, стартует невидимым -->
+        <ScrollView
+            android:id="@+id/contentContainer"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="80dp">
+            android:layout_height="match_parent"
+            android:visibility="invisible"
+            android:showDividers="none">
 
-            <!-- Hero Image + Timer -->
-            <FrameLayout
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="240dp"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="20dp">
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="80dp">
 
-                <ImageView
-                    android:id="@+id/ivHeroCouple"
+                <!-- Hero Image + Timer -->
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/hero_image"
-                    android:background="#D0C8B8"/>
+                    android:layout_height="240dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginBottom="20dp">
 
-                <!-- Timer overlay -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|center_horizontal"
-                    android:layout_marginBottom="16dp"
-                    android:orientation="vertical"
-                    android:background="@drawable/timer_overlay_background"
-                    android:padding="12dp"
-                    android:gravity="center">
+                    <ImageView
+                        android:id="@+id/ivHeroCouple"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/hero_image"
+                        android:background="#D0C8B8"/>
 
-                    <TextView
+                    <!-- Timer overlay -->
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TOGETHER FOR"
-                        android:textSize="9sp"
-                        android:textColor="#CCCCCC"
-                        android:letterSpacing="0.15"
-                        android:layout_marginBottom="4dp"/>
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:layout_marginBottom="16dp"
+                        android:orientation="vertical"
+                        android:background="@drawable/timer_overlay_background"
+                        android:padding="12dp"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="TOGETHER FOR"
+                            android:textSize="9sp"
+                            android:textColor="#CCCCCC"
+                            android:letterSpacing="0.15"
+                            android:layout_marginBottom="4dp"/>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:paddingHorizontal="12dp">
+
+                                <TextView
+                                    android:id="@+id/tvYears"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="00"
+                                    android:textSize="28sp"
+                                    android:textStyle="bold"
+                                    android:textColor="#FFFFFF"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Years"
+                                    android:textSize="9sp"
+                                    android:textColor="#CCCCCC"/>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:paddingHorizontal="12dp">
+
+                                <TextView
+                                    android:id="@+id/tvMonths"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="00"
+                                    android:textSize="28sp"
+                                    android:textStyle="bold"
+                                    android:textColor="#FFFFFF"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Months"
+                                    android:textSize="9sp"
+                                    android:textColor="#CCCCCC"/>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:paddingHorizontal="12dp">
+
+                                <TextView
+                                    android:id="@+id/tvDays"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="00"
+                                    android:textSize="28sp"
+                                    android:textStyle="bold"
+                                    android:textColor="#FFFFFF"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Days"
+                                    android:textSize="9sp"
+                                    android:textColor="#CCCCCC"/>
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+                </FrameLayout>
+
+                <!-- Message of the day -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginBottom="24dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:gravity="center">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:paddingHorizontal="12dp">
-
-                            <TextView
-                                android:id="@+id/tvYears"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="00"
-                                android:textSize="28sp"
-                                android:textStyle="bold"
-                                android:textColor="#FFFFFF"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Years"
-                                android:textSize="9sp"
-                                android:textColor="#CCCCCC"/>
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:paddingHorizontal="12dp">
-
-                            <TextView
-                                android:id="@+id/tvMonths"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="00"
-                                android:textSize="28sp"
-                                android:textStyle="bold"
-                                android:textColor="#FFFFFF"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Months"
-                                android:textSize="9sp"
-                                android:textColor="#CCCCCC"/>
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:paddingHorizontal="12dp">
-
-                            <TextView
-                                android:id="@+id/tvDays"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="00"
-                                android:textSize="28sp"
-                                android:textStyle="bold"
-                                android:textColor="#FFFFFF"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Days"
-                                android:textSize="9sp"
-                                android:textColor="#CCCCCC"/>
-                        </LinearLayout>
-                    </LinearLayout>
-                </LinearLayout>
-            </FrameLayout>
-
-            <!-- Message of the day -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:layout_marginBottom="24dp">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="✉  "
-                        android:textSize="14sp"
-                        android:textColor="#5C5470"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Сообщение дня"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="#2D2D2D"/>
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tvDailyMessage"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="No message yet today. Leave a little note to brighten their day."
-                    android:textSize="13sp"
-                    android:textColor="#8A8A8A"
-                    android:lineSpacingMultiplier="1.4"
-                    android:layout_marginBottom="12dp"/>
-
-                <Button
-                    android:id="@+id/btnSendMessage"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:text="Отправить записку дня  ✉"
-                    android:textSize="12sp"
-                    android:textColor="#4A4560"
-                    android:background="@drawable/button_background"
-                    android:stateListAnimator="@null"/>
-            </LinearLayout>
-
-            <!-- Divider -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#EAEAE4"
-                android:layout_marginBottom="20dp"/>
-
-            <!-- Upcoming dates -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:layout_marginBottom="24dp">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ближайшие даты"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="#2D2D2D"/>
-
-                    <TextView
-                        android:id="@+id/tvViewCalendar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="View Calendar"
-                        android:textSize="12sp"
-                        android:textColor="#5C5470"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:clickable="true"
-                        android:focusable="true"/>
-                </RelativeLayout>
-
-                <!-- Dates cards row -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <!-- Card 1 -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:background="@drawable/date_card_background"
-                        android:padding="12dp"
-                        android:layout_marginEnd="8dp">
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
 
                         <TextView
-                            android:id="@+id/tvDate1Label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Oct 24"
-                            android:textSize="11sp"
-                            android:textColor="#8A8A8A"
-                            android:layout_marginBottom="4dp"/>
+                            android:text="✉  "
+                            android:textSize="14sp"
+                            android:textColor="#5C5470"/>
 
                         <TextView
-                            android:id="@+id/tvDate1Name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Anniversary"
-                            android:textSize="15sp"
+                            android:text="Сообщение дня"
+                            android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="#2D2D2D"
-                            android:layout_marginBottom="8dp"/>
-
-                        <TextView
-                            android:id="@+id/tvDate1Days"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="In 5 days"
-                            android:textSize="11sp"
-                            android:textColor="#5C5470"
-                            android:background="@drawable/tag_background"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="3dp"/>
+                            android:textColor="#2D2D2D"/>
                     </LinearLayout>
 
-                    <!-- Card 2 -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:background="@drawable/date_card_background"
-                        android:padding="12dp">
-
-                        <TextView
-                            android:id="@+id/tvDate2Label"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Nov 12"
-                            android:textSize="11sp"
-                            android:textColor="#8A8A8A"
-                            android:layout_marginBottom="4dp"/>
-
-                        <TextView
-                            android:id="@+id/tvDate2Name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Partner's Birth"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:textColor="#2D2D2D"
-                            android:layout_marginBottom="8dp"/>
-
-                        <TextView
-                            android:id="@+id/tvDate2Days"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="In 24 days"
-                            android:textSize="11sp"
-                            android:textColor="#5C5470"
-                            android:background="@drawable/tag_background"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="3dp"/>
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- Divider -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#EAEAE4"
-                android:layout_marginBottom="20dp"/>
-
-            <!-- Memories -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp">
-
                     <TextView
+                        android:id="@+id/tvDailyMessage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Последние воспоминания"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="#2D2D2D"/>
+                        android:text="No message yet today. Leave a little note to brighten their day."
+                        android:textSize="13sp"
+                        android:textColor="#8A8A8A"
+                        android:lineSpacingMultiplier="1.4"
+                        android:layout_marginBottom="12dp"/>
 
-                    <TextView
-                        android:id="@+id/tvGallery"
+                    <Button
+                        android:id="@+id/btnSendMessage"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Gallery"
+                        android:layout_height="40dp"
+                        android:text="Отправить записку дня  ✉"
                         android:textSize="12sp"
-                        android:textColor="#5C5470"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:clickable="true"
-                        android:focusable="true"/>
-                </RelativeLayout>
-
-                <!-- Photos row -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="100dp"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="12dp">
-
-                    <ImageView
-                        android:id="@+id/ivMemory1"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:scaleType="centerCrop"
-                        android:background="#D8D0C0"
-                        android:layout_marginEnd="4dp"/>
-
-                    <ImageView
-                        android:id="@+id/ivMemory2"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:scaleType="centerCrop"
-                        android:background="#C8D8D0"/>
+                        android:textColor="#4A4560"
+                        android:background="@drawable/button_background"
+                        android:stateListAnimator="@null"/>
                 </LinearLayout>
 
-                <!-- Journal entry -->
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#EAEAE4"
+                    android:layout_marginBottom="20dp"/>
+
+                <!-- Upcoming dates -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="@drawable/social_button_background"
-                    android:padding="16dp">
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginBottom="24dp">
 
-                    <TextView
-                        android:id="@+id/tvJournalEntry"
-                        android:layout_width="wrap_content"
+                    <RelativeLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/journal_entry_sample"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="#2D2D2D"
-                        android:layout_marginBottom="4dp"/>
+                        android:layout_marginBottom="12dp">
 
-                    <TextView
-                        android:id="@+id/tvJournalMeta"
-                        android:layout_width="wrap_content"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Ближайшие даты"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="#2D2D2D"/>
+
+                        <TextView
+                            android:id="@+id/tvViewCalendar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="View Calendar"
+                            android:textSize="12sp"
+                            android:textColor="#5C5470"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:clickable="true"
+                            android:focusable="true"/>
+                    </RelativeLayout>
+
+                    <!-- Dates cards row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Journal entry • 2 days ago"
-                        android:textSize="12sp"
-                        android:textColor="#8A8A8A"/>
+                        android:orientation="horizontal">
+
+                        <!-- Card 1 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:background="@drawable/date_card_background"
+                            android:padding="12dp"
+                            android:layout_marginEnd="8dp">
+
+                            <TextView
+                                android:id="@+id/tvDate1Label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Oct 24"
+                                android:textSize="11sp"
+                                android:textColor="#8A8A8A"
+                                android:layout_marginBottom="4dp"/>
+
+                            <TextView
+                                android:id="@+id/tvDate1Name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Anniversary"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="#2D2D2D"
+                                android:layout_marginBottom="8dp"/>
+
+                            <TextView
+                                android:id="@+id/tvDate1Days"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="In 5 days"
+                                android:textSize="11sp"
+                                android:textColor="#5C5470"
+                                android:background="@drawable/tag_background"
+                                android:paddingHorizontal="8dp"
+                                android:paddingVertical="3dp"/>
+                        </LinearLayout>
+
+                        <!-- Card 2 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:background="@drawable/date_card_background"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:id="@+id/tvDate2Label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Nov 12"
+                                android:textSize="11sp"
+                                android:textColor="#8A8A8A"
+                                android:layout_marginBottom="4dp"/>
+
+                            <TextView
+                                android:id="@+id/tvDate2Name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Partner's Birth"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="#2D2D2D"
+                                android:layout_marginBottom="8dp"/>
+
+                            <TextView
+                                android:id="@+id/tvDate2Days"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="In 24 days"
+                                android:textSize="11sp"
+                                android:textColor="#5C5470"
+                                android:background="@drawable/tag_background"
+                                android:paddingHorizontal="8dp"
+                                android:paddingVertical="3dp"/>
+                        </LinearLayout>
+                    </LinearLayout>
                 </LinearLayout>
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#EAEAE4"
+                    android:layout_marginBottom="20dp"/>
+
+                <!-- Memories -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Последние воспоминания"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="#2D2D2D"/>
+
+                        <TextView
+                            android:id="@+id/tvGallery"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Gallery"
+                            android:textSize="12sp"
+                            android:textColor="#5C5470"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:clickable="true"
+                            android:focusable="true"/>
+                    </RelativeLayout>
+
+                    <!-- Photos row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp">
+
+                        <ImageView
+                            android:id="@+id/ivMemory1"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:scaleType="centerCrop"
+                            android:background="#D8D0C0"
+                            android:layout_marginEnd="4dp"/>
+
+                        <ImageView
+                            android:id="@+id/ivMemory2"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:scaleType="centerCrop"
+                            android:background="#C8D8D0"/>
+                    </LinearLayout>
+
+                    <!-- Journal entry -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="@drawable/social_button_background"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tvJournalEntry"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/journal_entry_sample"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:textColor="#2D2D2D"
+                            android:layout_marginBottom="4dp"/>
+
+                        <TextView
+                            android:id="@+id/tvJournalMeta"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Journal entry • 2 days ago"
+                            android:textSize="12sp"
+                            android:textColor="#8A8A8A"/>
+                    </LinearLayout>
+                </LinearLayout>
+
             </LinearLayout>
+        </ScrollView>
 
-        </LinearLayout>
-    </ScrollView>
+        <!-- NEW: лоадер поверх контента, по центру -->
+        <ProgressBar
+            android:id="@+id/progressLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="visible"/>
 
-    <!-- Bottom Navigation -->
+    </FrameLayout>
+
+    <!-- Bottom Navigation (виден сразу, до загрузки данных) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"

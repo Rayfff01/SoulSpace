@@ -251,8 +251,10 @@ public class ProfileActivity extends AppCompatActivity {
         navMemories.setOnClickListener(v ->
                 Toast.makeText(this, "Memories — скоро", Toast.LENGTH_SHORT).show());
 
-        navCalendar.setOnClickListener(v ->
-                Toast.makeText(this, "Calendar — скоро", Toast.LENGTH_SHORT).show());
+        navCalendar.setOnClickListener(v -> {
+            startActivity(new Intent(this, CalendarActivity.class));
+            finish();
+        });
 
         findViewById(R.id.itemNotifications).setOnClickListener(v ->
                 Toast.makeText(this, "Notifications — скоро", Toast.LENGTH_SHORT).show());

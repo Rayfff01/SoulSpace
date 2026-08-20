@@ -2,7 +2,9 @@ package com.example.soulspace;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,11 +30,50 @@ public class RelationshipMainActivity extends AppCompatActivity {
     private String partnerId;
     private DatabaseReference db;
 
+    // NEW: loading state views
+    private View contentContainer;
+    private ProgressBar progressLoading;
+
+    // NEW: track whether each async piece has finished at least once
+    private boolean timerReady = false;
+    private boolean dailyMessageReady = false;
+
     private void loadPartnerId() {
         db = FirebaseDatabase.getInstance().getReference();
         String relationshipId = UserCache.getRelationshipId();
-        if (relationshipId == null) return;
 
+        if (relationshipId != null) {
+            loadPartnerFromRelationship(relationshipId);
+            return;
+        }
+
+        // NEW: локального кэша ещё нет (самый первый заход после привязки пары) —
+        // раньше тут просто выходили и записка партнёра никогда не грузилась.
+        // Теперь достаём relationshipId из Firebase, как это уже делает loadRelationshipData().
+        db.child("users").child(currentUserId).child("relationshipId")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+                        String id = snapshot.getValue(String.class);
+                        if (id == null) {
+                            dailyMessageReady = true;
+                            checkIfReadyToShow();
+                            return;
+                        }
+                        loadPartnerFromRelationship(id);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        dailyMessageReady = true;
+                        checkIfReadyToShow();
+                    }
+                });
+    }
+
+    // NEW: вынесено в отдельный метод, чтобы использовать и с кэшированным,
+    // и со свежедобытым из Firebase relationshipId
+    private void loadPartnerFromRelationship(String relationshipId) {
         db.child("relationships").child(relationshipId)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -44,7 +85,10 @@ public class RelationshipMainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError error) {}
+                    public void onCancelled(DatabaseError error) {
+                        dailyMessageReady = true;
+                        checkIfReadyToShow();
+                    }
                 });
     }
 
@@ -67,20 +111,25 @@ public class RelationshipMainActivity extends AppCompatActivity {
         UserCache.init(this);
 
         initViews();
+        showLoading(); // NEW: прячем контент, пока не готовы и таймер, и записка партнёра
 
         if (UserCache.hasTimerCache()) {
             tvYears.setText(UserCache.getTimerYears());
             tvMonths.setText(UserCache.getTimerMonths());
             tvDays.setText(UserCache.getTimerDays());
+            timerReady = true; // NEW: таймер уже есть из кэша, ждать нечего
 
-            // Если кэш свежий — не идём в Firebase
+            // Если кэш свежий — не идём в Firebase за таймером
             if (UserCache.isTimerCacheFresh()) {
                 setListeners();
+                loadPartnerId(); // NEW: без этого вызова daily-сообщение партнёра никогда не подгружалось
+                checkIfReadyToShow(); // NEW
                 return;
             }
         }
 
         loadRelationshipData();
+        loadPartnerId(); // NEW
         setListeners();
     }
 
@@ -92,6 +141,28 @@ public class RelationshipMainActivity extends AppCompatActivity {
         navMemories = findViewById(R.id.navMemories);
         navCalendar = findViewById(R.id.navCalendar);
         navProfile = findViewById(R.id.navProfile);
+
+        // NEW — должны существовать в activity_relationship_main.xml
+        contentContainer = findViewById(R.id.contentContainer);
+        progressLoading = findViewById(R.id.progressLoading);
+    }
+
+    // NEW: loading state helpers
+    private void showLoading() {
+        contentContainer.setVisibility(View.INVISIBLE);
+        progressLoading.setVisibility(View.VISIBLE);
+    }
+
+    private void showContent() {
+        progressLoading.setVisibility(View.GONE);
+        contentContainer.setVisibility(View.VISIBLE);
+    }
+
+    // NEW: показываем контент только когда готовы и таймер, и записка партнёра
+    private void checkIfReadyToShow() {
+        if (timerReady && dailyMessageReady) {
+            showContent();
+        }
     }
 
     private void setListeners() {
@@ -100,8 +171,10 @@ public class RelationshipMainActivity extends AppCompatActivity {
         navMemories.setOnClickListener(v ->
                 Toast.makeText(this, "Memories — скоро", Toast.LENGTH_SHORT).show());
 
-        navCalendar.setOnClickListener(v ->
-                Toast.makeText(this, "Calendar — скоро", Toast.LENGTH_SHORT).show());
+        navCalendar.setOnClickListener(v -> {
+            startActivity(new Intent(this, CalendarActivity.class));
+            finish();
+        });
 
         navProfile.setOnClickListener(v -> {
             startActivity(new Intent(this, ProfileActivity.class));
@@ -112,8 +185,13 @@ public class RelationshipMainActivity extends AppCompatActivity {
             startActivity(new Intent(this, DailyMessageActivity.class));
         });
     }
+
     private void loadDailyMessage() {
-        if (partnerId == null) return;
+        if (partnerId == null) {
+            dailyMessageReady = true; // NEW
+            checkIfReadyToShow();     // NEW
+            return;
+        }
 
         db.child("daily_messages").child(partnerId)
                 .addValueEventListener(new ValueEventListener() {
@@ -122,11 +200,17 @@ public class RelationshipMainActivity extends AppCompatActivity {
                         TextView tvMsg = findViewById(R.id.tvDailyMessage);
                         if (!snapshot.exists()) {
                             tvMsg.setText("Сообщений пока нет. Отправь записку партнёру!");
+                            dailyMessageReady = true; // NEW
+                            checkIfReadyToShow();     // NEW
                             return;
                         }
                         String text = snapshot.child("text").getValue(String.class);
                         Long sentAt = snapshot.child("sentAt").getValue(Long.class);
-                        if (sentAt == null) return;
+                        if (sentAt == null) {
+                            dailyMessageReady = true; // NEW
+                            checkIfReadyToShow();     // NEW
+                            return;
+                        }
 
                         long dayInMs = 24 * 60 * 60 * 1000L;
                         if (System.currentTimeMillis() - sentAt > dayInMs) {
@@ -134,10 +218,15 @@ public class RelationshipMainActivity extends AppCompatActivity {
                         } else {
                             tvMsg.setText(text);
                         }
+                        dailyMessageReady = true; // NEW
+                        checkIfReadyToShow();     // NEW
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError error) {}
+                    public void onCancelled(DatabaseError error) {
+                        dailyMessageReady = true; // NEW
+                        checkIfReadyToShow();     // NEW
+                    }
                 });
     }
 
@@ -148,12 +237,19 @@ public class RelationshipMainActivity extends AppCompatActivity {
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot snapshot) {
-                        if (!snapshot.exists()) return;
+                        if (!snapshot.exists()) {
+                            timerReady = true; // NEW
+                            checkIfReadyToShow(); // NEW
+                            return;
+                        }
                         loadRelationship(snapshot.getValue(String.class));
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError error) {}
+                    public void onCancelled(DatabaseError error) {
+                        timerReady = true; // NEW
+                        checkIfReadyToShow(); // NEW
+                    }
                 });
     }
 
@@ -163,10 +259,18 @@ public class RelationshipMainActivity extends AppCompatActivity {
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot snapshot) {
-                        if (!snapshot.exists()) return;
+                        if (!snapshot.exists()) {
+                            timerReady = true; // NEW
+                            checkIfReadyToShow(); // NEW
+                            return;
+                        }
 
                         String inviterUid = snapshot.child("user1").getValue(String.class);
-                        if (inviterUid == null) return;
+                        if (inviterUid == null) {
+                            timerReady = true; // NEW
+                            checkIfReadyToShow(); // NEW
+                            return;
+                        }
 
                         FirebaseDatabase.getInstance().getReference("invites")
                                 .child(inviterUid).child("date")
@@ -174,16 +278,26 @@ public class RelationshipMainActivity extends AppCompatActivity {
                                     @Override
                                     public void onDataChange(DataSnapshot dateSnapshot) {
                                         String date = dateSnapshot.getValue(String.class);
-                                        if (date != null) calculateTimer(date);
+                                        if (date != null) {
+                                            calculateTimer(date);
+                                        }
+                                        timerReady = true; // NEW
+                                        checkIfReadyToShow(); // NEW
                                     }
 
                                     @Override
-                                    public void onCancelled(DatabaseError error) {}
+                                    public void onCancelled(DatabaseError error) {
+                                        timerReady = true; // NEW
+                                        checkIfReadyToShow(); // NEW
+                                    }
                                 });
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError error) {}
+                    public void onCancelled(DatabaseError error) {
+                        timerReady = true; // NEW
+                        checkIfReadyToShow(); // NEW
+                    }
                 });
     }
 
