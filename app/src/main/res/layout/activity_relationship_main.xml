@@ -5,7 +5,10 @@
     android:orientation="vertical"
     android:background="#F5F5F0">
 
-    <!-- Top Bar (виден сразу, до загрузки данных) -->
+    <!-- ========================= -->
+    <!-- TOP BAR -->
+    <!-- ========================= -->
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
@@ -18,7 +21,7 @@
             android:textSize="20sp"
             android:textColor="#5C5470"
             android:layout_centerVertical="true"
-            android:layout_alignParentStart="true"/>
+            android:layout_alignParentStart="true" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -27,7 +30,7 @@
             android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="#2D2D2D"
-            android:layout_centerInParent="true"/>
+            android:layout_centerInParent="true" />
 
         <ImageView
             android:id="@+id/ivAvatar"
@@ -36,16 +39,19 @@
             android:layout_centerVertical="true"
             android:layout_alignParentEnd="true"
             android:background="@drawable/avatar_circle_background"
-            android:scaleType="centerCrop"/>
+            android:scaleType="centerCrop" />
+
     </RelativeLayout>
 
-    <!-- NEW: обёртка, чтобы ProgressBar мог лежать по центру поверх скролла с контентом -->
+    <!-- ========================= -->
+    <!-- CONTENT -->
+    <!-- ========================= -->
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <!-- NEW: сам ScrollView теперь contentContainer, стартует невидимым -->
         <ScrollView
             android:id="@+id/contentContainer"
             android:layout_width="match_parent"
@@ -59,7 +65,10 @@
                 android:orientation="vertical"
                 android:paddingBottom="80dp">
 
-                <!-- Hero Image + Timer -->
+                <!-- ========================= -->
+                <!-- HERO -->
+                <!-- ========================= -->
+
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="240dp"
@@ -72,9 +81,10 @@
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
                         android:src="@drawable/hero_image"
-                        android:background="#D0C8B8"/>
+                        android:background="#D0C8B8" />
 
-                    <!-- Timer overlay -->
+                    <!-- TIMER -->
+
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -92,13 +102,15 @@
                             android:textSize="9sp"
                             android:textColor="#CCCCCC"
                             android:letterSpacing="0.15"
-                            android:layout_marginBottom="4dp"/>
+                            android:layout_marginBottom="4dp" />
 
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center">
+
+                            <!-- YEARS -->
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -114,15 +126,18 @@
                                     android:text="00"
                                     android:textSize="28sp"
                                     android:textStyle="bold"
-                                    android:textColor="#FFFFFF"/>
+                                    android:textColor="#FFFFFF" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Years"
                                     android:textSize="9sp"
-                                    android:textColor="#CCCCCC"/>
+                                    android:textColor="#CCCCCC" />
+
                             </LinearLayout>
+
+                            <!-- MONTHS -->
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -138,15 +153,18 @@
                                     android:text="00"
                                     android:textSize="28sp"
                                     android:textStyle="bold"
-                                    android:textColor="#FFFFFF"/>
+                                    android:textColor="#FFFFFF" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Months"
                                     android:textSize="9sp"
-                                    android:textColor="#CCCCCC"/>
+                                    android:textColor="#CCCCCC" />
+
                             </LinearLayout>
+
+                            <!-- DAYS -->
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -162,20 +180,27 @@
                                     android:text="00"
                                     android:textSize="28sp"
                                     android:textStyle="bold"
-                                    android:textColor="#FFFFFF"/>
+                                    android:textColor="#FFFFFF" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Days"
                                     android:textSize="9sp"
-                                    android:textColor="#CCCCCC"/>
+                                    android:textColor="#CCCCCC" />
+
                             </LinearLayout>
+
                         </LinearLayout>
+
                     </LinearLayout>
+
                 </FrameLayout>
 
-                <!-- Message of the day -->
+                <!-- ========================= -->
+                <!-- DAILY MESSAGE -->
+                <!-- ========================= -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -195,7 +220,7 @@
                             android:layout_height="wrap_content"
                             android:text="✉  "
                             android:textSize="14sp"
-                            android:textColor="#5C5470"/>
+                            android:textColor="#5C5470" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -203,18 +228,19 @@
                             android:text="Сообщение дня"
                             android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="#2D2D2D"/>
+                            android:textColor="#2D2D2D" />
+
                     </LinearLayout>
 
                     <TextView
                         android:id="@+id/tvDailyMessage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="No message yet today. Leave a little note to brighten their day."
+                        android:text="Сообщений пока нет. Отправь записку партнёру!"
                         android:textSize="13sp"
                         android:textColor="#8A8A8A"
                         android:lineSpacingMultiplier="1.4"
-                        android:layout_marginBottom="12dp"/>
+                        android:layout_marginBottom="12dp" />
 
                     <Button
                         android:id="@+id/btnSendMessage"
@@ -224,23 +250,30 @@
                         android:textSize="12sp"
                         android:textColor="#4A4560"
                         android:background="@drawable/button_background"
-                        android:stateListAnimator="@null"/>
+                        android:stateListAnimator="@null" />
+
                 </LinearLayout>
 
-                <!-- Divider -->
+                <!-- DIVIDER -->
+
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#EAEAE4"
-                    android:layout_marginBottom="20dp"/>
+                    android:layout_marginBottom="20dp" />
 
-                <!-- Upcoming dates -->
+                <!-- ========================= -->
+                <!-- UPCOMING DATES -->
+                <!-- ========================= -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:paddingHorizontal="16dp"
                     android:layout_marginBottom="24dp">
+
+                    <!-- HEADER -->
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -253,7 +286,7 @@
                             android:text="Ближайшие даты"
                             android:textSize="18sp"
                             android:textStyle="bold"
-                            android:textColor="#2D2D2D"/>
+                            android:textColor="#2D2D2D" />
 
                         <TextView
                             android:id="@+id/tvViewCalendar"
@@ -265,106 +298,50 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:clickable="true"
-                            android:focusable="true"/>
+                            android:focusable="true" />
+
                     </RelativeLayout>
 
-                    <!-- Dates cards row -->
+                    <!-- ========================= -->
+                    <!-- DYNAMIC CARDS -->
+                    <!-- ========================= -->
+
                     <LinearLayout
+                        android:id="@+id/upcomingDatesRow"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal" />
 
-                        <!-- Card 1 -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:background="@drawable/date_card_background"
-                            android:padding="12dp"
-                            android:layout_marginEnd="8dp">
+                    <!-- ========================= -->
+                    <!-- NO DATES -->
+                    <!-- ========================= -->
 
-                            <TextView
-                                android:id="@+id/tvDate1Label"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Oct 24"
-                                android:textSize="11sp"
-                                android:textColor="#8A8A8A"
-                                android:layout_marginBottom="4dp"/>
+                    <TextView
+                        android:id="@+id/tvNoUpcomingDates"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Ближайших дат пока нет."
+                        android:textSize="14sp"
+                        android:textColor="#8A8A8A"
+                        android:gravity="center"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:visibility="gone" />
 
-                            <TextView
-                                android:id="@+id/tvDate1Name"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Anniversary"
-                                android:textSize="15sp"
-                                android:textStyle="bold"
-                                android:textColor="#2D2D2D"
-                                android:layout_marginBottom="8dp"/>
-
-                            <TextView
-                                android:id="@+id/tvDate1Days"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="In 5 days"
-                                android:textSize="11sp"
-                                android:textColor="#5C5470"
-                                android:background="@drawable/tag_background"
-                                android:paddingHorizontal="8dp"
-                                android:paddingVertical="3dp"/>
-                        </LinearLayout>
-
-                        <!-- Card 2 -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:background="@drawable/date_card_background"
-                            android:padding="12dp">
-
-                            <TextView
-                                android:id="@+id/tvDate2Label"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Nov 12"
-                                android:textSize="11sp"
-                                android:textColor="#8A8A8A"
-                                android:layout_marginBottom="4dp"/>
-
-                            <TextView
-                                android:id="@+id/tvDate2Name"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Partner's Birth"
-                                android:textSize="15sp"
-                                android:textStyle="bold"
-                                android:textColor="#2D2D2D"
-                                android:layout_marginBottom="8dp"/>
-
-                            <TextView
-                                android:id="@+id/tvDate2Days"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="In 24 days"
-                                android:textSize="11sp"
-                                android:textColor="#5C5470"
-                                android:background="@drawable/tag_background"
-                                android:paddingHorizontal="8dp"
-                                android:paddingVertical="3dp"/>
-                        </LinearLayout>
-                    </LinearLayout>
                 </LinearLayout>
 
-                <!-- Divider -->
+                <!-- DIVIDER -->
+
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#EAEAE4"
-                    android:layout_marginBottom="20dp"/>
+                    android:layout_marginBottom="20dp" />
 
-                <!-- Memories -->
+                <!-- ========================= -->
+                <!-- MEMORIES -->
+                <!-- ========================= -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -382,7 +359,7 @@
                             android:text="Последние воспоминания"
                             android:textSize="18sp"
                             android:textStyle="bold"
-                            android:textColor="#2D2D2D"/>
+                            android:textColor="#2D2D2D" />
 
                         <TextView
                             android:id="@+id/tvGallery"
@@ -394,10 +371,12 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:clickable="true"
-                            android:focusable="true"/>
+                            android:focusable="true" />
+
                     </RelativeLayout>
 
-                    <!-- Photos row -->
+                    <!-- PHOTOS -->
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="100dp"
@@ -411,7 +390,7 @@
                             android:layout_weight="1"
                             android:scaleType="centerCrop"
                             android:background="#D8D0C0"
-                            android:layout_marginEnd="4dp"/>
+                            android:layout_marginEnd="4dp" />
 
                         <ImageView
                             android:id="@+id/ivMemory2"
@@ -419,10 +398,12 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:scaleType="centerCrop"
-                            android:background="#C8D8D0"/>
+                            android:background="#C8D8D0" />
+
                     </LinearLayout>
 
-                    <!-- Journal entry -->
+                    <!-- JOURNAL -->
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -438,7 +419,7 @@
                             android:textSize="15sp"
                             android:textStyle="bold"
                             android:textColor="#2D2D2D"
-                            android:layout_marginBottom="4dp"/>
+                            android:layout_marginBottom="4dp" />
 
                         <TextView
                             android:id="@+id/tvJournalMeta"
@@ -446,30 +427,39 @@
                             android:layout_height="wrap_content"
                             android:text="Journal entry • 2 days ago"
                             android:textSize="12sp"
-                            android:textColor="#8A8A8A"/>
+                            android:textColor="#8A8A8A" />
+
                     </LinearLayout>
+
                 </LinearLayout>
 
             </LinearLayout>
+
         </ScrollView>
 
-        <!-- NEW: лоадер поверх контента, по центру -->
+        <!-- LOADER -->
+
         <ProgressBar
             android:id="@+id/progressLoading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:visibility="visible"/>
+            android:visibility="visible" />
 
     </FrameLayout>
 
-    <!-- Bottom Navigation (виден сразу, до загрузки данных) -->
+    <!-- ========================= -->
+    <!-- BOTTOM NAVIGATION -->
+    <!-- ========================= -->
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:orientation="horizontal"
         android:background="#FFFFFF"
         android:elevation="8dp">
+
+        <!-- HOME -->
 
         <LinearLayout
             android:id="@+id/navHome"
@@ -485,14 +475,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🏠"
-                android:textSize="18sp"/>
+                android:textSize="18sp" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Home"
                 android:textSize="10sp"
-                android:textColor="#5C5470"/>
+                android:textColor="#5C5470" />
+
         </LinearLayout>
+
+        <!-- MEMORIES -->
 
         <LinearLayout
             android:id="@+id/navMemories"
@@ -509,14 +503,18 @@
                 android:layout_height="wrap_content"
                 android:text="✦"
                 android:textSize="18sp"
-                android:textColor="#8A8A8A"/>
+                android:textColor="#8A8A8A" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Memories"
                 android:textSize="10sp"
-                android:textColor="#8A8A8A"/>
+                android:textColor="#8A8A8A" />
+
         </LinearLayout>
+
+        <!-- CALENDAR -->
 
         <LinearLayout
             android:id="@+id/navCalendar"
@@ -533,14 +531,18 @@
                 android:layout_height="wrap_content"
                 android:text="📅"
                 android:textSize="18sp"
-                android:textColor="#8A8A8A"/>
+                android:textColor="#8A8A8A" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Calendar"
                 android:textSize="10sp"
-                android:textColor="#8A8A8A"/>
+                android:textColor="#8A8A8A" />
+
         </LinearLayout>
+
+        <!-- PROFILE -->
 
         <LinearLayout
             android:id="@+id/navProfile"
@@ -557,14 +559,17 @@
                 android:layout_height="wrap_content"
                 android:text="👤"
                 android:textSize="18sp"
-                android:textColor="#8A8A8A"/>
+                android:textColor="#8A8A8A" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Profile"
                 android:textSize="10sp"
-                android:textColor="#8A8A8A"/>
+                android:textColor="#8A8A8A" />
+
         </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>

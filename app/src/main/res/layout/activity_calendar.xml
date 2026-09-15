@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#F5F5F0">
 
-    <!-- Top Bar (без кнопки "Назад" — переход только через нижнюю навигацию) -->
+    <!-- TOP -->
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
@@ -19,9 +22,12 @@
             android:textStyle="bold"
             android:textColor="#2D2D2D"
             android:layout_centerInParent="true"/>
+
     </RelativeLayout>
 
-    <!-- Обёртка для лоадера поверх контента -->
+
+    <!-- CONTENT + LOADING -->
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -34,33 +40,238 @@
             android:orientation="vertical"
             android:visibility="invisible">
 
-            <ScrollView
+            <!-- MODE SWITCH -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:background="#FFFFFF"
+                android:padding="4dp">
+
+                <TextView
+                    android:id="@+id/btnCalendarMode"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="Календарь"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#5C5470"
+                    android:gravity="center"
+                    android:clickable="true"
+                    android:focusable="true"/>
+
+                <TextView
+                    android:id="@+id/btnListMode"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="Список"
+                    android:textSize="13sp"
+                    android:textColor="#8A8A8A"
+                    android:gravity="center"
+                    android:clickable="true"
+                    android:focusable="true"/>
+
+            </LinearLayout>
+
+
+            <!-- CALENDAR -->
+
+            <LinearLayout
+                android:id="@+id/calendarContainer"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <!-- MONTH HEADER -->
 
                 <LinearLayout
-                    android:id="@+id/eventsContainer"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:layout_height="50dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp">
 
                     <TextView
-                        android:id="@+id/tvEmptyState"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Пока нет добавленных дат.\nДобавьте первую важную дату вашей пары."
-                        android:textSize="13sp"
-                        android:textColor="#8A8A8A"
+                        android:id="@+id/btnPreviousMonth"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:text="‹"
+                        android:textSize="30sp"
+                        android:textColor="#5C5470"
                         android:gravity="center"
-                        android:lineSpacingMultiplier="1.4"
-                        android:layout_marginTop="32dp"
-                        android:visibility="gone"/>
+                        android:clickable="true"
+                        android:focusable="true"/>
+
+                    <TextView
+                        android:id="@+id/tvMonth"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Август 2026"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#2D2D2D"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:id="@+id/btnNextMonth"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:text="›"
+                        android:textSize="30sp"
+                        android:textColor="#5C5470"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true"/>
 
                 </LinearLayout>
 
+
+                <!-- WEEK DAYS -->
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="32dp"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="6dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="Пн"
+                        android:textSize="11sp"
+                        android:textColor="#8A8A8A"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="Вт"
+                        android:textSize="11sp"
+                        android:textColor="#8A8A8A"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="Ср"
+                        android:textSize="11sp"
+                        android:textColor="#8A8A8A"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="Чт"
+                        android:textSize="11sp"
+                        android:textColor="#8A8A8A"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="Пт"
+                        android:textSize="11sp"
+                        android:textColor="#8A8A8A"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="Сб"
+                        android:textSize="11sp"
+                        android:textColor="#8A8A8A"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="Вс"
+                        android:textSize="11sp"
+                        android:textColor="#8A8A8A"
+                        android:gravity="center"/>
+
+                </LinearLayout>
+
+
+                <!-- CALENDAR GRID -->
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="10dp">
+
+                        <GridLayout
+                            android:id="@+id/calendarGrid"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:columnCount="7"/>
+
+                        <TextView
+                            android:id="@+id/tvEmptyState"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Пока нет добавленных дат.\nДобавьте первую важную дату вашей пары."
+                            android:textSize="13sp"
+                            android:textColor="#8A8A8A"
+                            android:gravity="center"
+                            android:lineSpacingMultiplier="1.4"
+                            android:paddingTop="24dp"
+                            android:visibility="gone"/>
+
+                    </LinearLayout>
+
+                </ScrollView>
+
+            </LinearLayout>
+
+
+            <!-- LIST -->
+
+            <ScrollView
+                android:id="@+id/listContainer"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:visibility="gone"
+                android:fillViewport="true"
+                android:clipToPadding="false"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <LinearLayout
+                    android:id="@+id/listContentContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="16dp"/>
+
             </ScrollView>
+
+
+            <!-- ADD BUTTON -->
 
             <Button
                 android:id="@+id/btnAddEvent"
@@ -75,6 +286,9 @@
 
         </LinearLayout>
 
+
+        <!-- LOADING -->
+
         <ProgressBar
             android:id="@+id/progressLoading"
             android:layout_width="wrap_content"
@@ -84,7 +298,9 @@
 
     </FrameLayout>
 
-    <!-- Bottom Navigation -->
+
+    <!-- BOTTOM NAVIGATION -->
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
@@ -106,15 +322,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🏠"
-                android:textSize="18sp"
-                android:textColor="#8A8A8A"/>
+                android:textSize="18sp"/>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Home"
                 android:textSize="10sp"
                 android:textColor="#8A8A8A"/>
+
         </LinearLayout>
+
 
         <LinearLayout
             android:id="@+id/navMemories"
@@ -132,15 +350,19 @@
                 android:text="✦"
                 android:textSize="18sp"
                 android:textColor="#8A8A8A"/>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Memories"
                 android:textSize="10sp"
                 android:textColor="#8A8A8A"/>
+
         </LinearLayout>
 
-        <!-- Активная вкладка -->
+
+        <!-- ACTIVE -->
+
         <LinearLayout
             android:id="@+id/navCalendar"
             android:layout_width="0dp"
@@ -156,13 +378,16 @@
                 android:layout_height="wrap_content"
                 android:text="📅"
                 android:textSize="18sp"/>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Calendar"
                 android:textSize="10sp"
                 android:textColor="#5C5470"/>
+
         </LinearLayout>
+
 
         <LinearLayout
             android:id="@+id/navProfile"
@@ -180,13 +405,16 @@
                 android:text="👤"
                 android:textSize="18sp"
                 android:textColor="#8A8A8A"/>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Profile"
                 android:textSize="10sp"
                 android:textColor="#8A8A8A"/>
+
         </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>
