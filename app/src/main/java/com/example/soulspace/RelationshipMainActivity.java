@@ -1549,11 +1549,6 @@ public class RelationshipMainActivity extends AppCompatActivity {
         }
     }
 
-
-    // =========================================================
-    // EVENT MODEL
-    // =========================================================
-
     private static class EventInfo {
 
         String eventId;
@@ -1581,11 +1576,6 @@ public class RelationshipMainActivity extends AppCompatActivity {
                     repeatYearly;
         }
     }
-
-
-    // =========================================================
-    // UPCOMING EVENT MODEL
-    // =========================================================
 
     private static class UpcomingEvent {
 
