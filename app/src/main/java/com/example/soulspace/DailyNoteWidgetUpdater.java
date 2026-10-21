@@ -8,9 +8,16 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.widget.RemoteViews;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -73,16 +80,8 @@ final class DailyNoteWidgetUpdater {
                 note, currentUid, System.currentTimeMillis());
 
         Bundle options = manager.getAppWidgetOptions(widgetId);
-        int minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0);
-        int minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0);
-
-        boolean compact = minWidth < 200 || minHeight < 130;
-        boolean tall = !compact && minWidth >= 250 && minHeight >= 250;
-        int layout = compact
-                ? R.layout.widget_daily_note_compact
-                : (tall ? R.layout.widget_daily_note_tall : R.layout.widget_daily_note);
-
-        RemoteViews views = new RemoteViews(appContext.getPackageName(), layout);
+        int widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0);
+        int heightDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0);
 
         String noteText;
         String metaText;
@@ -99,18 +98,247 @@ final class DailyNoteWidgetUpdater {
             metaText = appContext.getString(R.string.widget_daily_note_hint);
         }
 
+        RemoteViews views = createViews(appContext, widthDp, heightDp, noteText, metaText, hasNote);
+        manager.updateAppWidget(widgetId, views);
+    }
+
+    /**
+     * Builds the widget content for a concrete size. Package-private so
+     * instrumented tests can verify wrapping and truncation on a real device.
+     */
+    static RemoteViews createViews(Context context,
+                                   int widthDp,
+                                   int heightDp,
+                                   String noteText,
+                                   String metaText,
+                                   boolean hasNote) {
+        Context appContext = context.getApplicationContext();
+        int width = widthDp > 0 ? widthDp : DailyNoteWidgetSizing.DEFAULT_WIDTH_DP;
+        int height = heightDp > 0 ? heightDp : DailyNoteWidgetSizing.DEFAULT_HEIGHT_DP;
+
+        DailyNoteWidgetSizing.Kind kind = DailyNoteWidgetSizing.chooseKind(width, height);
+        LayoutSpec spec = LayoutSpec.forKind(kind);
+        Sizing sizing = measure(appContext, spec, width, height, noteText);
+
+        RemoteViews views = new RemoteViews(appContext.getPackageName(), spec.layoutRes);
         views.setTextViewText(R.id.widget_note_text, noteText);
         views.setTextColor(R.id.widget_note_text, hasNote ? COLOR_TEXT : COLOR_MUTED);
+        // XML supplies safe defaults for the preview; at runtime the number of
+        // lines follows the actual height reported by the host.
+        views.setInt(R.id.widget_note_text, "setMaxLines", sizing.maxLines);
 
         views.setTextViewText(R.id.widget_note_meta, metaText);
-        boolean showMeta = !compact && minHeight >= 170;
         views.setViewVisibility(
                 R.id.widget_note_meta,
-                showMeta ? android.view.View.VISIBLE : android.view.View.GONE
+                sizing.showMeta ? android.view.View.VISIBLE : android.view.View.GONE
         );
 
+        int paddingPx = Math.round(sizing.paddingDp
+                * appContext.getResources().getDisplayMetrics().density);
+        views.setViewPadding(
+                R.id.widget_card, paddingPx, paddingPx, paddingPx, paddingPx);
+
         views.setOnClickPendingIntent(R.id.widget_root, openAppPendingIntent(appContext));
-        manager.updateAppWidget(widgetId, views);
+        return views;
+    }
+
+    private static Sizing measure(Context context,
+                                  LayoutSpec spec,
+                                  int widthDp,
+                                  int heightDp,
+                                  CharSequence text) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        float density = metrics.density;
+        int paddingDp = spec.paddingFor(heightDp);
+
+        TextPaint textPaint = newPaint(spToPx(spec.textSizeSp, metrics));
+        // getFontSpacing() already includes the font leading, so it is a
+        // conservative line height. The card may then still leave a couple of
+        // dp unused, which is cheaper than clipping the last line.
+        float textLineHeightPx = textPaint.getFontSpacing()
+                * spec.lineSpacingMultiplier;
+
+        float headerHeightPx =
+                newPaint(spToPx(spec.headerTextSizeSp, metrics)).getFontSpacing();
+        float metaHeightPx =
+                newPaint(spToPx(spec.metaTextSizeSp, metrics)).getFontSpacing();
+
+        float fixedHeightPx = 2f * paddingDp * density
+                + headerHeightPx
+                + spec.textTopMarginDp * density
+                + spec.dividerBlockDp * density;
+        float heightPx = heightDp * density;
+        float safetyPx = 2f * density;
+
+        float availableWithoutMeta = Math.max(0f, heightPx - fixedHeightPx - safetyPx);
+        float availableWithMeta = Math.max(
+                0f,
+                availableWithoutMeta
+                        - metaHeightPx
+                        - spec.metaTopMarginDp * density
+        );
+
+        int linesWithoutMeta = DailyNoteWidgetSizing.maxLines(
+                availableWithoutMeta, textLineHeightPx);
+        int linesWithMeta = spec.supportsMeta
+                ? DailyNoteWidgetSizing.maxLines(availableWithMeta, textLineHeightPx)
+                : 0;
+
+        int measuredLines = countLines(text, textPaint, spec, widthDp, paddingDp, metrics);
+        // Keep the meta row only while the whole note fits with it. A longer
+        // note takes the freed line instead of being cut off one line earlier.
+        boolean showMeta = spec.supportsMeta
+                && availableWithMeta >= textLineHeightPx
+                && measuredLines <= linesWithMeta;
+
+        int maxLines = showMeta ? linesWithMeta : linesWithoutMeta;
+        return new Sizing(maxLines, showMeta, paddingDp);
+    }
+
+    private static int countLines(CharSequence text,
+                                  TextPaint paint,
+                                  LayoutSpec spec,
+                                  int widthDp,
+                                  int paddingDp,
+                                  DisplayMetrics metrics) {
+        if (text == null || text.length() == 0) {
+            return 1;
+        }
+        int contentWidthPx = Math.max(
+                1,
+                Math.round((widthDp - 2f * paddingDp) * metrics.density)
+        );
+        StaticLayout layout = StaticLayout.Builder
+                .obtain(text, 0, text.length(), paint, contentWidthPx)
+                .setLineSpacing(0f, spec.lineSpacingMultiplier)
+                .setIncludePad(false)
+                .setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY)
+                .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
+                .build();
+        return Math.max(1, layout.getLineCount());
+    }
+
+    private static TextPaint newPaint(float textSizePx) {
+        TextPaint paint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        paint.setTextSize(textSizePx);
+        paint.setTypeface(Typeface.DEFAULT);
+        return paint;
+    }
+
+    private static float spToPx(float sp, DisplayMetrics metrics) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, metrics);
+    }
+
+    private static final class Sizing {
+        final int maxLines;
+        final boolean showMeta;
+        final int paddingDp;
+
+        Sizing(int maxLines, boolean showMeta, int paddingDp) {
+            this.maxLines = maxLines;
+            this.showMeta = showMeta;
+            this.paddingDp = paddingDp;
+        }
+    }
+
+    /**
+     * Visual parameters that mirror the three XML layouts. Keeping them next to
+     * the measuring code makes the line math and the inflated views agree.
+     */
+    private static final class LayoutSpec {
+        final DailyNoteWidgetSizing.Kind kind;
+        final int layoutRes;
+        final float textSizeSp;
+        final float lineSpacingMultiplier;
+        final float headerTextSizeSp;
+        final float metaTextSizeSp;
+        final int paddingDp;
+        final int textTopMarginDp;
+        final int dividerBlockDp;
+        final int metaTopMarginDp;
+        final boolean supportsMeta;
+
+        LayoutSpec(DailyNoteWidgetSizing.Kind kind,
+                   int layoutRes,
+                   float textSizeSp,
+                   float lineSpacingMultiplier,
+                   float headerTextSizeSp,
+                   float metaTextSizeSp,
+                   int paddingDp,
+                   int textTopMarginDp,
+                   int dividerBlockDp,
+                   int metaTopMarginDp,
+                   boolean supportsMeta) {
+            this.kind = kind;
+            this.layoutRes = layoutRes;
+            this.textSizeSp = textSizeSp;
+            this.lineSpacingMultiplier = lineSpacingMultiplier;
+            this.headerTextSizeSp = headerTextSizeSp;
+            this.metaTextSizeSp = metaTextSizeSp;
+            this.paddingDp = paddingDp;
+            this.textTopMarginDp = textTopMarginDp;
+            this.dividerBlockDp = dividerBlockDp;
+            this.metaTopMarginDp = metaTopMarginDp;
+            this.supportsMeta = supportsMeta;
+        }
+
+        static LayoutSpec forKind(DailyNoteWidgetSizing.Kind kind) {
+            switch (kind) {
+                case TALL:
+                    return new LayoutSpec(
+                            kind,
+                            R.layout.widget_daily_note_tall,
+                            17f,
+                            1.35f,
+                            16f,
+                            12f,
+                            22,
+                            16,
+                            15,
+                            10,
+                            true
+                    );
+                case NORMAL:
+                    return new LayoutSpec(
+                            kind,
+                            R.layout.widget_daily_note,
+                            15f,
+                            1.3f,
+                            14f,
+                            11f,
+                            18,
+                            12,
+                            11,
+                            6,
+                            true
+                    );
+                case COMPACT:
+                default:
+                    return new LayoutSpec(
+                            kind,
+                            R.layout.widget_daily_note_compact,
+                            13f,
+                            1.25f,
+                            12f,
+                            10f,
+                            14,
+                            6,
+                            0,
+                            4,
+                            false
+                    );
+            }
+        }
+
+        int paddingFor(int heightDp) {
+            if (kind == DailyNoteWidgetSizing.Kind.COMPACT && heightDp < 90) {
+                return 10;
+            }
+            if (kind == DailyNoteWidgetSizing.Kind.NORMAL && heightDp < 150) {
+                return 14;
+            }
+            return paddingDp;
+        }
     }
 
     /** Re-renders every widget from the local cache and re-arms the expiry alarm. */
