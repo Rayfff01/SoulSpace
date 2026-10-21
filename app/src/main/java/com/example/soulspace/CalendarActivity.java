@@ -40,1113 +40,309 @@ import java.util.Locale;
 import java.util.Map;
 
 public class CalendarActivity extends AppCompatActivity {
-
-    // =========================
-    // UI
-    // =========================
-
     private GridLayout calendarGrid;
-
     private TextView tvMonth;
     private TextView tvEmptyState;
-
     private Button btnAddEvent;
-
     private TextView btnPreviousMonth;
     private TextView btnNextMonth;
-
     private TextView btnCalendarMode;
     private TextView btnListMode;
-
     private LinearLayout calendarContainer;
-
-    // ВАЖНО:
-    // listContainer = ScrollView
-    // listContentContainer = LinearLayout внутри ScrollView
     private ScrollView listContainer;
     private LinearLayout listContentContainer;
-
     private LinearLayout navHome;
     private LinearLayout navMemories;
     private LinearLayout navCalendar;
     private LinearLayout navProfile;
-
     private View contentContainer;
     private ProgressBar progressLoading;
-
-    // =========================
-    // Firebase
-    // =========================
-
     private DatabaseReference db;
-
     private String currentUserId;
     private String relationshipId;
-
     private ValueEventListener eventsListener;
-
-    // =========================
-    // Data
-    // =========================
-
-    private final Map<String, List<EventInfo>> eventsByDate =
-            new HashMap<>();
-
+    private final Map<String, List<EventInfo>> eventsByDate = new HashMap<>();
     private boolean eventsLoadedOnce = false;
-
-    // =========================
-    // Calendar
-    // =========================
-
     private Calendar displayedMonth;
-
     private boolean listMode = false;
-
-    // =========================
-    // Colors
-    // =========================
-
-    private static final int COLOR_TEXT =
-            Color.rgb(45, 45, 45);
-
-    private static final int COLOR_SECONDARY =
-            Color.rgb(138, 138, 138);
-
-    private static final int COLOR_ACCENT =
-            Color.rgb(92, 84, 112);
-
-    private static final int COLOR_EVENT =
-            Color.rgb(244, 232, 237);
-
-    // =========================
-    // onCreate
-    // =========================
-
+    private static final int COLOR_TEXT = Color.rgb(45, 45, 45);
+    private static final int COLOR_SECONDARY = Color.rgb(138, 138, 138);
+    private static final int COLOR_ACCENT = Color.rgb(92, 84, 112);
+    private static final int COLOR_EVENT = Color.rgb(244, 232, 237);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
-
-        setContentView(
-                R.layout.activity_calendar
-        );
-
+        setContentView(R.layout.activity_calendar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
-
-        if (
-                FirebaseAuth
-                        .getInstance()
-                        .getCurrentUser()
-                        == null
-        ) {
-
-            startActivity(
-                    new Intent(
-                            this,
-                            LoginActivity.class
-                    )
-            );
-
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            startActivity(new Intent(this, LoginActivity.class));
             finish();
-
             return;
         }
-
-        currentUserId =
-                FirebaseAuth
-                        .getInstance()
-                        .getCurrentUser()
-                        .getUid();
-
+        currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         UserCache.init(this);
-
-        db =
-                FirebaseDatabase
-                        .getInstance()
-                        .getReference();
-
-        displayedMonth =
-                Calendar.getInstance();
-
-        displayedMonth.set(
-                Calendar.DAY_OF_MONTH,
-                1
-        );
-
+        db = FirebaseDatabase.getInstance().getReference();
+        displayedMonth = Calendar.getInstance();
+        displayedMonth.set(Calendar.DAY_OF_MONTH, 1);
         initViews();
-
         showLoading();
-
         setListeners();
-
         resolveRelationshipId();
     }
-
-    // =========================
-    // Init views
-    // =========================
-
     private void initViews() {
-
-        calendarGrid =
-                findViewById(
-                        R.id.calendarGrid
-                );
-
-        tvMonth =
-                findViewById(
-                        R.id.tvMonth
-                );
-
-        tvEmptyState =
-                findViewById(
-                        R.id.tvEmptyState
-                );
-
-        btnAddEvent =
-                findViewById(
-                        R.id.btnAddEvent
-                );
-
-        btnPreviousMonth =
-                findViewById(
-                        R.id.btnPreviousMonth
-                );
-
-        btnNextMonth =
-                findViewById(
-                        R.id.btnNextMonth
-                );
-
-        btnCalendarMode =
-                findViewById(
-                        R.id.btnCalendarMode
-                );
-
-        btnListMode =
-                findViewById(
-                        R.id.btnListMode
-                );
-
-        calendarContainer =
-                findViewById(
-                        R.id.calendarContainer
-                );
-
-        // ScrollView
-        listContainer =
-                findViewById(
-                        R.id.listContainer
-                );
-
-        // LinearLayout внутри ScrollView
-        listContentContainer =
-                findViewById(
-                        R.id.listContentContainer
-                );
-
-        navHome =
-                findViewById(
-                        R.id.navHome
-                );
-
-        navMemories =
-                findViewById(
-                        R.id.navMemories
-                );
-
-        navCalendar =
-                findViewById(
-                        R.id.navCalendar
-                );
-
-        navProfile =
-                findViewById(
-                        R.id.navProfile
-                );
-
-        contentContainer =
-                findViewById(
-                        R.id.contentContainer
-                );
-
-        progressLoading =
-                findViewById(
-                        R.id.progressLoading
-                );
+        calendarGrid = findViewById(R.id.calendarGrid);
+        tvMonth = findViewById(R.id.tvMonth);
+        tvEmptyState = findViewById(R.id.tvEmptyState);
+        btnAddEvent = findViewById(R.id.btnAddEvent);
+        btnPreviousMonth = findViewById(R.id.btnPreviousMonth);
+        btnNextMonth = findViewById(R.id.btnNextMonth);
+        btnCalendarMode = findViewById(R.id.btnCalendarMode);
+        btnListMode = findViewById(R.id.btnListMode);
+        calendarContainer = findViewById(R.id.calendarContainer);
+        listContainer = findViewById(R.id.listContainer);
+        listContentContainer = findViewById(R.id.listContentContainer);
+        navHome = findViewById(R.id.navHome);
+        navMemories = findViewById(R.id.navMemories);
+        navCalendar = findViewById(R.id.navCalendar);
+        navProfile = findViewById(R.id.navProfile);
+        contentContainer = findViewById(R.id.contentContainer);
+        progressLoading = findViewById(R.id.progressLoading);
     }
-
-    // =========================
-    // Loading
-    // =========================
-
     private void showLoading() {
-
-        contentContainer.setVisibility(
-                View.INVISIBLE
-        );
-
-        progressLoading.setVisibility(
-                View.VISIBLE
-        );
+        contentContainer.setVisibility(View.INVISIBLE);
+        progressLoading.setVisibility(View.VISIBLE);
     }
-
     private void showContent() {
-
-        progressLoading.setVisibility(
-                View.GONE
-        );
-
-        contentContainer.setVisibility(
-                View.VISIBLE
-        );
+        progressLoading.setVisibility(View.GONE);
+        contentContainer.setVisibility(View.VISIBLE);
     }
-
-    // =========================
-    // Relationship
-    // =========================
-
     private void resolveRelationshipId() {
-
-        String cached =
-                UserCache.getRelationshipId();
-
+        String cached = UserCache.getRelationshipId();
         if (cached != null) {
-
             relationshipId = cached;
-
             listenForEvents();
-
             return;
         }
-
-        db.child("users")
-                .child(currentUserId)
-                .child("relationshipId")
-                .addListenerForSingleValueEvent(
-                        new ValueEventListener() {
-
+        db.child("users").child(currentUserId).child("relationshipId").addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
-                            public void onDataChange(
-                                    DataSnapshot snapshot
-                            ) {
-
-                                relationshipId =
-                                        snapshot.getValue(
-                                                String.class
-                                        );
-
-                                if (
-                                        relationshipId
-                                                == null
-                                ) {
-
+                            public void onDataChange(DataSnapshot snapshot) {
+                                relationshipId = snapshot.getValue(String.class);
+                                if (relationshipId == null) {
                                     showContent();
-
                                     renderAll();
-
                                     return;
                                 }
-
                                 listenForEvents();
                             }
-
                             @Override
-                            public void onCancelled(
-                                    DatabaseError error
-                            ) {
-
+                            public void onCancelled(DatabaseError error) {
                                 showContent();
-
                                 renderAll();
                             }
                         }
                 );
     }
-
-    // =========================
-    // Firebase listener
-    // =========================
-
     private void listenForEvents() {
-
-        eventsListener =
-                new ValueEventListener() {
-
+        eventsListener = new ValueEventListener() {
                     @Override
-                    public void onDataChange(
-                            DataSnapshot snapshot
-                    ) {
-
+                    public void onDataChange(DataSnapshot snapshot) {
                         eventsByDate.clear();
-
-                        for (
-                                DataSnapshot eventSnapshot
-                                : snapshot.getChildren()
-                        ) {
-
-                            String eventId =
-                                    eventSnapshot.getKey();
-
-                            String title =
-                                    eventSnapshot
-                                            .child("title")
-                                            .getValue(
-                                                    String.class
-                                            );
-
-                            String date =
-                                    eventSnapshot
-                                            .child("date")
-                                            .getValue(
-                                                    String.class
-                                            );
-
-                            String addedBy =
-                                    eventSnapshot
-                                            .child("addedBy")
-                                            .getValue(
-                                                    String.class
-                                            );
-
-                            Long createdAt =
-                                    eventSnapshot
-                                            .child("createdAt")
-                                            .getValue(
-                                                    Long.class
-                                            );
-
-                            Boolean repeatYearly =
-                                    eventSnapshot
-                                            .child("repeatYearly")
-                                            .getValue(
-                                                    Boolean.class
-                                            );
-
+                        for (DataSnapshot eventSnapshot : snapshot.getChildren()) {
+                            String eventId = eventSnapshot.getKey();
+                            String title = eventSnapshot.child("title").getValue(String.class);
+                            String date = eventSnapshot.child("date").getValue(String.class);
+                            String addedBy = eventSnapshot.child("addedBy").getValue(String.class);
+                            Long createdAt = eventSnapshot.child("createdAt").getValue(Long.class);
+                            Boolean repeatYearly = eventSnapshot.child("repeatYearly").getValue(Boolean.class);
                             if (date == null) {
                                 continue;
                             }
-
-                            EventInfo event =
-                                    new EventInfo(
-                                            eventId,
-                                            title != null
-                                                    ? title
-                                                    : "",
-                                            date,
-                                            addedBy,
-                                            createdAt != null
-                                                    ? createdAt
-                                                    : 0,
-                                            repeatYearly != null
-                                                    && repeatYearly
-                                    );
-
-                            if (
-                                    !eventsByDate
-                                            .containsKey(date)
-                            ) {
-
-                                eventsByDate.put(
-                                        date,
-                                        new ArrayList<>()
-                                );
+                            EventInfo event = new EventInfo(eventId, title != null ? title : "", date, addedBy,
+                                            createdAt != null ? createdAt : 0, repeatYearly != null && repeatYearly);
+                            if (!eventsByDate.containsKey(date)) {
+                                eventsByDate.put(date, new ArrayList<>());
                             }
-
-                            eventsByDate
-                                    .get(date)
-                                    .add(event);
+                            eventsByDate.get(date).add(event);
                         }
-
                         renderAll();
-
                         if (!eventsLoadedOnce) {
-
                             eventsLoadedOnce = true;
-
                             showContent();
                         }
                     }
-
                     @Override
-                    public void onCancelled(
-                            DatabaseError error
-                    ) {
-
+                    public void onCancelled(DatabaseError error) {
                         if (!eventsLoadedOnce) {
-
                             eventsLoadedOnce = true;
-
                             showContent();
                         }
                     }
                 };
-
-        db.child("relationships")
-                .child(relationshipId)
-                .child("events")
-                .addValueEventListener(
-                        eventsListener
-                );
+        db.child("relationships").child(relationshipId).child("events").addValueEventListener(eventsListener);
     }
-
-    // =========================
-    // Render everything
-    // =========================
-
     private void renderAll() {
-
         renderCalendar();
-
         renderList();
-
         updateModeButtons();
     }
-
-    // =========================
-    // Calendar
-    // =========================
-
     private void renderCalendar() {
-
-        SimpleDateFormat monthFormat =
-                new SimpleDateFormat(
-                        "LLLL yyyy",
-                        new Locale(
-                                "ru",
-                                "RU"
-                        )
-                );
-
-        String monthText =
-                monthFormat.format(
-                        displayedMonth.getTime()
-                );
-
+        SimpleDateFormat monthFormat = new SimpleDateFormat("LLLL yyyy", new Locale("ru", "RU"));
+        String monthText = monthFormat.format(displayedMonth.getTime());
         if (!monthText.isEmpty()) {
-
-            monthText =
-                    monthText.substring(
-                            0,
-                            1
-                    ).toUpperCase()
-                            + monthText.substring(
-                            1
-                    );
+            monthText = monthText.substring(0, 1).toUpperCase() + monthText.substring(1);
         }
-
-        tvMonth.setText(
-                monthText
-        );
-
+        tvMonth.setText(monthText);
         calendarGrid.removeAllViews();
-
-        Calendar firstDay =
-                (Calendar)
-                        displayedMonth.clone();
-
-        firstDay.set(
-                Calendar.DAY_OF_MONTH,
-                1
-        );
-
-        int dayOfWeek =
-                firstDay.get(
-                        Calendar.DAY_OF_WEEK
-                );
-
-        int startOffset =
-                dayOfWeek
-                        - Calendar.MONDAY;
-
+        Calendar firstDay = (Calendar) displayedMonth.clone();
+        firstDay.set(Calendar.DAY_OF_MONTH, 1);
+        int dayOfWeek = firstDay.get(Calendar.DAY_OF_WEEK);
+        int startOffset = dayOfWeek - Calendar.MONDAY;
         if (startOffset < 0) {
             startOffset += 7;
         }
-
-        int daysInMonth =
-                displayedMonth
-                        .getActualMaximum(
-                                Calendar.DAY_OF_MONTH
-                        );
-
-        for (
-                int i = 0;
-                i < startOffset;
-                i++
-        ) {
-
+        int daysInMonth = displayedMonth.getActualMaximum(Calendar.DAY_OF_MONTH);
+        for (int i = 0; i < startOffset; i++) {
             addEmptyCalendarCell();
         }
-
-        for (
-                int day = 1;
-                day <= daysInMonth;
-                day++
-        ) {
-
-            Calendar date =
-                    (Calendar)
-                            displayedMonth.clone();
-
-            date.set(
-                    Calendar.DAY_OF_MONTH,
-                    day
-            );
-
-            List<EventInfo> events =
-                    getEventsForDate(
-                            date
-                    );
-
-            boolean hasEvent =
-                    events != null
-                            && !events.isEmpty();
-
-            boolean isToday =
-                    isToday(date);
-
-            addCalendarDay(
-                    day,
-                    hasEvent,
-                    isToday
-            );
+        for (int day = 1; day <= daysInMonth; day++) {
+            Calendar date = (Calendar) displayedMonth.clone();
+            date.set(Calendar.DAY_OF_MONTH, day);
+            List<EventInfo> events = getEventsForDate(date);
+            boolean hasEvent = events != null && !events.isEmpty();
+            boolean isToday = isToday(date);
+            addCalendarDay(day, hasEvent, isToday);
         }
-
-        int totalCells =
-                startOffset
-                        + daysInMonth;
-
-        int remainingCells =
-                7 - (
-                        totalCells % 7
-                );
-
+        int totalCells = startOffset + daysInMonth;
+        int remainingCells = 7 - (totalCells % 7);
         if (remainingCells < 7) {
-
-            for (
-                    int i = 0;
-                    i < remainingCells;
-                    i++
-            ) {
-
+            for (int i = 0; i < remainingCells; i++) {
                 addEmptyCalendarCell();
             }
         }
-
         if (eventsByDate.isEmpty()) {
-
-            tvEmptyState.setVisibility(
-                    View.VISIBLE
-            );
-
+            tvEmptyState.setVisibility(View.VISIBLE);
         } else {
-
-            tvEmptyState.setVisibility(
-                    View.GONE
-            );
+            tvEmptyState.setVisibility(View.GONE);
         }
     }
-
-    // =========================
-    // Empty calendar cell
-    // =========================
-
     private void addEmptyCalendarCell() {
-
-        TextView cell =
-                new TextView(this);
-
-        GridLayout.LayoutParams params =
-                new GridLayout.LayoutParams();
-
+        TextView cell = new TextView(this);
+        GridLayout.LayoutParams params = new GridLayout.LayoutParams();
         params.width = 0;
-
         params.height = dp(52);
-
-        params.columnSpec =
-                GridLayout.spec(
-                        GridLayout.UNDEFINED,
-                        1f
-                );
-
-        params.setMargins(
-                dp(3),
-                dp(3),
-                dp(3),
-                dp(3)
-        );
-
+        params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
+        params.setMargins(dp(3), dp(3), dp(3), dp(3));
         cell.setLayoutParams(params);
-
-        calendarGrid.addView(
-                cell
-        );
+        calendarGrid.addView(cell);
     }
-
-    // =========================
-    // Calendar day
-    // =========================
-
-    private void addCalendarDay(
-            int day,
-            boolean hasEvent,
-            boolean isToday
-    ) {
-
-        TextView dayView =
-                new TextView(this);
-
-        dayView.setText(
-                String.valueOf(day)
-        );
-
-        dayView.setTextSize(
-                14
-        );
-
-        dayView.setGravity(
-                Gravity.CENTER
-        );
-
-        GridLayout.LayoutParams params =
-                new GridLayout.LayoutParams();
-
+    private void addCalendarDay(int day, boolean hasEvent, boolean isToday) {
+        TextView dayView = new TextView(this);
+        dayView.setText(String.valueOf(day));
+        dayView.setTextSize(14);
+        dayView.setGravity(Gravity.CENTER);
+        GridLayout.LayoutParams params = new GridLayout.LayoutParams();
         params.width = 0;
-
         params.height = dp(52);
-
-        params.columnSpec =
-                GridLayout.spec(
-                        GridLayout.UNDEFINED,
-                        1f
-                );
-
-        params.setMargins(
-                dp(3),
-                dp(3),
-                dp(3),
-                dp(3)
-        );
-
-        dayView.setLayoutParams(
-                params
-        );
-
+        params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
+        params.setMargins(dp(3), dp(3), dp(3), dp(3));
+        dayView.setLayoutParams(params);
         if (hasEvent) {
-
-            dayView.setBackgroundResource(
-                    R.drawable.calendar_event_day
-            );
-
-            dayView.setTextColor(
-                    Color.rgb(
-                            92,
-                            55,
-                            68
-                    )
-            );
-
-            dayView.setTypeface(
-                    dayView.getTypeface(),
-                    Typeface.BOLD
-            );
-
+            dayView.setBackgroundResource(R.drawable.calendar_event_day);
+            dayView.setTextColor(Color.rgb(92, 55, 68));
+            dayView.setTypeface(dayView.getTypeface(), Typeface.BOLD);
         } else if (isToday) {
-
-            dayView.setBackgroundResource(
-                    R.drawable.calendar_today
-            );
-
-            dayView.setTextColor(
-                    Color.WHITE
-            );
-
-            dayView.setTypeface(
-                    dayView.getTypeface(),
-                    Typeface.BOLD
-            );
-
+            dayView.setBackgroundResource(R.drawable.calendar_today);
+            dayView.setTextColor(Color.WHITE);
+            dayView.setTypeface(dayView.getTypeface(), Typeface.BOLD);
         } else {
-
-            dayView.setTextColor(
-                    COLOR_TEXT
-            );
+            dayView.setTextColor(COLOR_TEXT);
         }
-
-        dayView.setOnClickListener(
-                v -> {
-
-                    Calendar clickedDate =
-                            (Calendar)
-                                    displayedMonth
-                                            .clone();
-
-                    clickedDate.set(
-                            Calendar.DAY_OF_MONTH,
-                            day
-                    );
-
-                    List<EventInfo> events =
-                            getEventsForDate(
-                                    clickedDate
-                            );
-
-                    if (
-                            events != null
-                                    && !events.isEmpty()
-                    ) {
-
-                        showEventsDialog(
-                                formatDate(
-                                        clickedDate
-                                ),
-                                events
-                        );
-
+        dayView.setOnClickListener(v -> {
+                    Calendar clickedDate = (Calendar) displayedMonth.clone();
+                    clickedDate.set(Calendar.DAY_OF_MONTH, day);
+                    List<EventInfo> events = getEventsForDate(clickedDate);
+                    if (events != null && !events.isEmpty()) {
+                        showEventsDialog(formatDate(clickedDate), events);
                     } else {
-
-                        showEmptyDateDialog(
-                                formatDate(
-                                        clickedDate
-                                )
-                        );
+                        showEmptyDateDialog(formatDate(clickedDate));
                     }
                 }
         );
-
-        calendarGrid.addView(
-                dayView
-        );
+        calendarGrid.addView(dayView);
     }
-
-    // =========================
-    // LIST MODE
-    // =========================
-
     private void renderList() {
-
-        // ВАЖНО:
-        // очищаем LinearLayout внутри ScrollView,
-        // а не сам ScrollView
         listContentContainer.removeAllViews();
-
-        List<EventInfo> allEvents =
-                getAllEvents();
-
+        List<EventInfo> allEvents = getAllEvents();
         if (allEvents.isEmpty()) {
-
-            TextView empty =
-                    new TextView(this);
-
-            empty.setText(
-                    "Пока нет важных дат.\n\n" +
-                            "Добавьте первую дату вашей пары ♥"
-            );
-
-            empty.setTextSize(
-                    14
-            );
-
-            empty.setTextColor(
-                    COLOR_SECONDARY
-            );
-
-            empty.setGravity(
-                    Gravity.CENTER
-            );
-
-            empty.setPadding(
-                    dp(20),
-                    dp(40),
-                    dp(20),
-                    dp(40)
-            );
-
-            listContentContainer.addView(
-                    empty
-            );
-
+            TextView empty = new TextView(this);
+            empty.setText("Пока нет важных дат.\n\n" + "Добавьте первую дату вашей пары ♥");
+            empty.setTextSize(14);
+            empty.setTextColor(COLOR_SECONDARY);
+            empty.setGravity(Gravity.CENTER);
+            empty.setPadding(dp(20), dp(40), dp(20), dp(40));
+            listContentContainer.addView(empty);
             return;
         }
-
-        for (
-                EventInfo event
-                : allEvents
-        ) {
-
-            listContentContainer.addView(
-                    buildListEvent(
-                            event
-                    )
-            );
+        for (EventInfo event : allEvents) {
+            listContentContainer.addView(buildListEvent(event));
         }
     }
-
-    // =========================
-    // Build list event
-    // =========================
-
-    private View buildListEvent(
-            EventInfo event
-    ) {
-
-        LinearLayout row =
-                new LinearLayout(this);
-
-        row.setOrientation(
-                LinearLayout.HORIZONTAL
-        );
-
-        row.setGravity(
-                Gravity.CENTER_VERTICAL
-        );
-
-        row.setPadding(
-                dp(16),
-                dp(14),
-                dp(12),
-                dp(14)
-        );
-
-        row.setBackgroundResource(
-                R.drawable.date_card_background
-        );
-
-        LinearLayout.LayoutParams rowParams =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        rowParams.bottomMargin =
-                dp(10);
-
-        row.setLayoutParams(
-                rowParams
-        );
-
-        // =========================
-        // Левая часть
-        // =========================
-
-        LinearLayout textColumn =
-                new LinearLayout(this);
-
-        textColumn.setOrientation(
-                LinearLayout.VERTICAL
-        );
-
-        LinearLayout.LayoutParams textParams =
-                new LinearLayout.LayoutParams(
-                        0,
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        1f
-                );
-
-        textColumn.setLayoutParams(
-                textParams
-        );
-
-        // =========================
-        // Название
-        // =========================
-
-        TextView title =
-                new TextView(this);
-
-        title.setText(
-                "♥  " + event.title
-        );
-
-        title.setTextSize(
-                15
-        );
-
-        title.setTextColor(
-                COLOR_TEXT
-        );
-
-        title.setTypeface(
-                title.getTypeface(),
-                Typeface.BOLD
-        );
-
-        textColumn.addView(
-                title
-        );
-
-        // =========================
-        // Дата
-        // =========================
-
-        TextView date =
-                new TextView(this);
-
+    private View buildListEvent(EventInfo event) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(dp(16), dp(14), dp(12), dp(14));
+        row.setBackgroundResource(R.drawable.date_card_background);
+        LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        rowParams.bottomMargin = dp(10);
+        row.setLayoutParams(rowParams);
+        LinearLayout textColumn = new LinearLayout(this);
+        textColumn.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+        textColumn.setLayoutParams(textParams);
+        TextView title = new TextView(this);
+        title.setText("♥  " + event.title);
+        title.setTextSize(15);
+        title.setTextColor(COLOR_TEXT);
+        title.setTypeface(title.getTypeface(), Typeface.BOLD);
+        textColumn.addView(title);
+        TextView date = new TextView(this);
         if (event.repeatYearly) {
-
-            date.setText(
-                    getYearlyDateText(
-                            event
-                    )
-            );
-
+            date.setText(getYearlyDateText(event));
         } else {
-
-            date.setText(
-                    formatReadableDate(
-                            event.date
-                    )
-            );
+            date.setText(formatReadableDate(event.date));
         }
-
-        date.setTextSize(
-                13
-        );
-
-        date.setTextColor(
-                COLOR_SECONDARY
-        );
-
-        LinearLayout.LayoutParams dateParams =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        dateParams.topMargin =
-                dp(5);
-
-        date.setLayoutParams(
-                dateParams
-        );
-
-        textColumn.addView(
-                date
-        );
-
-        // =========================
-        // Countdown
-        // =========================
-
-        TextView countdown =
-                new TextView(this);
-
-        String countdownText =
-                getCountdownText(
-                        event
-                );
-
-        if (
-                countdownText != null
-                        && !countdownText.isEmpty()
-        ) {
-
-            countdown.setText(
-                    countdownText
-            );
-
-            countdown.setTextSize(
-                    12
-            );
-
-            countdown.setTextColor(
-                    COLOR_ACCENT
-            );
-
-            LinearLayout.LayoutParams countdownParams =
-                    new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT
-                    );
-
-            countdownParams.topMargin =
-                    dp(4);
-
-            countdown.setLayoutParams(
-                    countdownParams
-            );
-
-            textColumn.addView(
-                    countdown
-            );
+        date.setTextSize(13);
+        date.setTextColor(COLOR_SECONDARY);
+        LinearLayout.LayoutParams dateParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dateParams.topMargin = dp(5);
+        date.setLayoutParams(dateParams);
+        textColumn.addView(date);
+        TextView countdown = new TextView(this);
+        String countdownText = getCountdownText(event);
+        if (countdownText != null && !countdownText.isEmpty()) {
+            countdown.setText(countdownText);
+            countdown.setTextSize(12);
+            countdown.setTextColor(COLOR_ACCENT);
+            LinearLayout.LayoutParams countdownParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            countdownParams.topMargin = dp(4);
+            countdown.setLayoutParams(countdownParams);
+            textColumn.addView(countdown);
         }
-
-        row.addView(
-                textColumn
-        );
-
-        // =========================
-        // Delete
-        // =========================
-
-        TextView delete =
-                new TextView(this);
-
-        delete.setText(
-                "✕"
-        );
-
-        delete.setTextSize(
-                16
-        );
-
-        delete.setTextColor(
-                Color.rgb(
-                        160,
-                        160,
-                        160
-                )
-        );
-
-        delete.setGravity(
-                Gravity.CENTER
-        );
-
-        delete.setPadding(
-                dp(12),
-                dp(10),
-                dp(6),
-                dp(10)
-        );
-
-        delete.setClickable(
-                true
-        );
-
-        delete.setOnClickListener(
-                v ->
-                        confirmDeleteEvent(
-                                event.eventId,
-                                event.title
-                        )
-        );
-
-        row.addView(
-                delete
-        );
-
-        // =========================
-        // Open details
-        // =========================
-
-        row.setClickable(
-                true
-        );
-
-        row.setOnClickListener(
-                v -> {
-
-                    showEventsDialog(
-                            event.date,
-                            Collections.singletonList(
-                                    event
-                            )
-                    );
-                }
-        );
-
+        row.addView(textColumn);
+        TextView delete = new TextView(this);
+        delete.setText("✕");
+        delete.setTextSize(16);
+        delete.setTextColor(Color.rgb(160, 160, 160));
+        delete.setGravity(Gravity.CENTER);
+        delete.setPadding(dp(12), dp(10), dp(6), dp(10));
+        delete.setClickable(true);
+        delete.setOnClickListener(v -> confirmDeleteEvent(event.eventId, event.title));
+        row.addView(delete);
+        row.setClickable(true);
+        row.setOnClickListener(v -> {showEventsDialog(event.date, Collections.singletonList(event));});
         return row;
     }
 

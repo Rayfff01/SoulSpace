@@ -235,6 +235,8 @@ public class DailyMessageActivity extends AppCompatActivity {
                 } else {
                     tvPartnerMessage.setText(text);
                     tvPartnerMessageTime.setText("Отправлено " + formatTime(sentAt));
+                    DailyNoteWidgetUpdater.onNoteLoaded(
+                            DailyMessageActivity.this, currentUserId, text, sentAt);
                 }
                 partnerMessageReady = true; // NEW
                 checkIfReadyToShow();       // NEW

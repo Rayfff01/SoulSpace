@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">SoulSpace</string>
     <string name="journal_entry_sample">"That little cafe..."</string>
+
+    <string name="widget_daily_note_title">Записка дня</string>
+    <string name="widget_daily_note_description">Записка дня от партнёра</string>
+    <string name="widget_daily_note_empty">Партнёр ещё не отправил записку сегодня. Отправь свою!</string>
+    <string name="widget_daily_note_signed_out">Открой SoulSpace, чтобы увидеть записку дня</string>
+    <string name="widget_daily_note_from_partner">От партнёра · %1$s</string>
+    <string name="widget_daily_note_hint">Нажми, чтобы открыть</string>
 </resources>
