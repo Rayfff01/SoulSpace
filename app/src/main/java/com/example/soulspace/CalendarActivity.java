@@ -8,7 +8,9 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
@@ -69,6 +71,13 @@ public class CalendarActivity extends AppCompatActivity {
     private static final int COLOR_SECONDARY = Color.rgb(138, 138, 138);
     private static final int COLOR_ACCENT = Color.rgb(92, 84, 112);
     private static final int COLOR_EVENT = Color.rgb(244, 232, 237);
+    private static final float SWIPE_HORIZONTAL_BIAS = 1.5f;
+    private int swipeTouchSlop;
+    private int swipeMinimumDistance;
+    private boolean swipeTracking;
+    private boolean swipeInProgress;
+    private float swipeStartX;
+    private float swipeStartY;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,6 +96,7 @@ public class CalendarActivity extends AppCompatActivity {
         displayedMonth = Calendar.getInstance();
         displayedMonth.set(Calendar.DAY_OF_MONTH, 1);
         initViews();
+        initSwipeNavigation();
         showLoading();
         setListeners();
         resolveRelationshipId();
@@ -109,6 +119,126 @@ public class CalendarActivity extends AppCompatActivity {
         navProfile = findViewById(R.id.navProfile);
         contentContainer = findViewById(R.id.contentContainer);
         progressLoading = findViewById(R.id.progressLoading);
+    }
+    private void initSwipeNavigation() {
+        ViewConfiguration configuration = ViewConfiguration.get(this);
+        swipeTouchSlop = configuration.getScaledTouchSlop();
+        swipeMinimumDistance = Math.max(swipeTouchSlop * 4, dp(48));
+    }
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        int action = event.getActionMasked();
+
+        if (action == MotionEvent.ACTION_DOWN) {
+            resetSwipeState();
+            swipeTracking = canStartSwipe(event);
+            if (swipeTracking) {
+                swipeStartX = event.getRawX();
+                swipeStartY = event.getRawY();
+            }
+            boolean handled = super.dispatchTouchEvent(event);
+            return handled || swipeTracking;
+        }
+
+        if (!swipeTracking) {
+            return super.dispatchTouchEvent(event);
+        }
+
+        if (action == MotionEvent.ACTION_POINTER_DOWN) {
+            resetSwipeState();
+            return super.dispatchTouchEvent(event);
+        }
+
+        if (action == MotionEvent.ACTION_MOVE) {
+            float dx = event.getRawX() - swipeStartX;
+            float dy = event.getRawY() - swipeStartY;
+            float absX = Math.abs(dx);
+            float absY = Math.abs(dy);
+
+            if (!swipeInProgress) {
+                if (absY > swipeTouchSlop && absY >= absX) {
+                    resetSwipeState();
+                    return super.dispatchTouchEvent(event);
+                }
+                if (absX >= swipeMinimumDistance && absX > absY * SWIPE_HORIZONTAL_BIAS) {
+                    swipeInProgress = true;
+                    cancelChildTouch(event);
+                }
+            }
+
+            if (swipeInProgress) {
+                return true;
+            }
+            return super.dispatchTouchEvent(event);
+        }
+
+        if (action == MotionEvent.ACTION_UP) {
+            float dx = event.getRawX() - swipeStartX;
+            float dy = event.getRawY() - swipeStartY;
+            float absX = Math.abs(dx);
+            float absY = Math.abs(dy);
+            boolean horizontalSwipe = absX >= swipeMinimumDistance
+                    && absX > absY * SWIPE_HORIZONTAL_BIAS;
+
+            if (!swipeInProgress && horizontalSwipe) {
+                swipeInProgress = true;
+                cancelChildTouch(event);
+            }
+
+            boolean consumed = swipeInProgress;
+            if (horizontalSwipe) {
+                changeMonth(dx < 0 ? 1 : -1);
+            }
+
+            resetSwipeState();
+            return consumed || super.dispatchTouchEvent(event);
+        }
+
+        if (action == MotionEvent.ACTION_CANCEL) {
+            boolean consumed = swipeInProgress;
+            resetSwipeState();
+            return consumed || super.dispatchTouchEvent(event);
+        }
+
+        return super.dispatchTouchEvent(event);
+    }
+    private boolean canStartSwipe(MotionEvent event) {
+        if (listMode
+                || contentContainer.getVisibility() != View.VISIBLE
+                || calendarContainer.getVisibility() != View.VISIBLE) {
+            return false;
+        }
+        float rawX = event.getRawX();
+        float rawY = event.getRawY();
+        if (!isPointInsideView(calendarContainer, rawX, rawY)) {
+            return false;
+        }
+        return !isPointInsideView(btnPreviousMonth, rawX, rawY)
+                && !isPointInsideView(btnNextMonth, rawX, rawY);
+    }
+    private boolean isPointInsideView(View view, float rawX, float rawY) {
+        if (view == null || view.getVisibility() != View.VISIBLE
+                || view.getWidth() == 0 || view.getHeight() == 0) {
+            return false;
+        }
+        int[] location = new int[2];
+        view.getLocationOnScreen(location);
+        return rawX >= location[0]
+                && rawX < location[0] + view.getWidth()
+                && rawY >= location[1]
+                && rawY < location[1] + view.getHeight();
+    }
+    private void cancelChildTouch(MotionEvent event) {
+        MotionEvent cancel = MotionEvent.obtain(event);
+        cancel.setAction(MotionEvent.ACTION_CANCEL);
+        super.dispatchTouchEvent(cancel);
+        cancel.recycle();
+    }
+    private void resetSwipeState() {
+        swipeTracking = false;
+        swipeInProgress = false;
+        swipeStartX = 0f;
+        swipeStartY = 0f;
     }
     private void showLoading() {
         contentContainer.setVisibility(View.INVISIBLE);
