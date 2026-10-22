@@ -23,6 +23,8 @@ public class SplashActivity extends AppCompatActivity {
             getSupportActionBar().hide();
         }
 
+        TogetherWidgetUpdater.updateAllFromCache(this);
+
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             // Не авторизован — на логин
             startActivity(new Intent(this, LoginActivity.class));

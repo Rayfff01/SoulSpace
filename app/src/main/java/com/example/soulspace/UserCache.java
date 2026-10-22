@@ -64,6 +64,17 @@ public class UserCache {
         return System.currentTimeMillis() - lastUpdated < dayInMs;
     }
 
+    /**
+     * Forces the existing screens to reload the relationship date/timer after
+     * the widget changes invites/{user1}/date.
+     */
+    public static void invalidateRelationshipCache() {
+        prefs.edit()
+                .remove("profile_updated")
+                .remove("timer_updated")
+                .apply();
+    }
+
     public static void clear() {
         prefs.edit().clear().apply();
     }

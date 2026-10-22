@@ -8,4 +8,33 @@
     <string name="widget_daily_note_signed_out">Открой SoulSpace, чтобы увидеть записку дня</string>
     <string name="widget_daily_note_from_partner">От партнёра · %1$s</string>
     <string name="widget_daily_note_hint">Нажми, чтобы открыть</string>
+
+    <string name="widget_together_title">Сколько мы вместе</string>
+    <string name="widget_together_heart">♥</string>
+    <string name="widget_together_calendar_icon">📅</string>
+    <string name="widget_together_description">Счётчик продолжительности ваших отношений</string>
+    <string name="widget_together_no_date">Укажи дату начала отношений</string>
+    <string name="widget_together_no_date_short">Укажи дату начала</string>
+    <string name="widget_together_no_date_tiny">Нет даты</string>
+    <string name="widget_together_signed_out">Войди в SoulSpace</string>
+    <string name="widget_together_signed_out_tiny">Войди</string>
+    <string name="widget_together_future">До нашей даты: %1$s</string>
+    <string name="widget_together_future_short">До даты: %1$s</string>
+    <string name="widget_together_future_tiny">До %1$s</string>
+    <string name="widget_together_preview_count">1 год · 3 мес. · 12 дн.</string>
+
+    <string name="widget_together_configure_title">Сколько мы вместе</string>
+    <string name="widget_together_configure_subtitle">Выбери дату начала отношений — виджет будет считать, сколько вы уже вместе.</string>
+    <string name="widget_together_configure_date_label">ДАТА НАЧАЛА ОТНОШЕНИЙ</string>
+    <string name="widget_together_configure_date_hint">Выбери дату</string>
+    <string name="widget_together_configure_save">Сохранить</string>
+    <string name="widget_together_configure_later">Позже</string>
+    <string name="widget_together_configure_login">Войди в SoulSpace, чтобы указать дату начала отношений.</string>
+    <string name="widget_together_configure_no_relationship">Сначала создай отношения в SoulSpace.</string>
+    <string name="widget_together_configure_load_error">Не удалось загрузить данные. Проверь подключение и попробуй снова.</string>
+    <string name="widget_together_configure_error">Не удалось сохранить дату. Проверь подключение и попробуй снова.</string>
+    <string name="widget_together_configure_select_date">Сначала выбери дату.</string>
+    <string name="widget_together_configure_future">Дата в будущем — виджет покажет, сколько осталось.</string>
+    <string name="widget_together_configure_saved">Дата сохранена</string>
+    <string name="widget_together_open_app">Открыть SoulSpace</string>
 </resources>

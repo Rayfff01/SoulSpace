@@ -23,6 +23,27 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/daily_note_widget_info" />
         </receiver>
+        <receiver
+            android:name=".TogetherWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_together_title">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/together_widget_info" />
+        </receiver>
+        <activity
+            android:name=".TogetherWidgetConfigureActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:label="@string/widget_together_title">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".CalendarActivity"
             android:exported="false" />
