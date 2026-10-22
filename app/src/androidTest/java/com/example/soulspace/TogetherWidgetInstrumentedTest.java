@@ -40,8 +40,9 @@ public class TogetherWidgetInstrumentedTest {
 
         assertNotNull(root);
         assertNotNull(root.findViewById(R.id.widget_together_root));
+        assertNotNull(root.findViewById(R.id.widget_together_label));
         assertNotNull(root.findViewById(R.id.widget_together_count));
-        assertEquals(2, ((ViewGroup) root).getChildCount());
+        assertEquals(3, ((ViewGroup) root).getChildCount());
     }
 
     @Test
@@ -100,14 +101,35 @@ public class TogetherWidgetInstrumentedTest {
         assertEquals(1, count.getMaxLines());
         assertEquals(1, count.getLineCount());
         assertNoEllipsis(count);
+
+        TextView label = root.findViewById(R.id.widget_together_label);
+        assertEquals(View.VISIBLE, label.getVisibility());
+        assertEquals("МЫ ВМЕСТЕ", label.getText().toString());
+        assertNoEllipsis(label);
     }
 
     @Test
-    public void remoteViewsUseTinyFormatAtMinimumWidth() {
+    public void remoteViewsShowLabelAtDefaultWidth() {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        View root = apply(context, 110, 40, FULL, COMPACT, TINY);
+        View root = apply(context, 180, 40, FULL, COMPACT, TINY);
+        TextView label = root.findViewById(R.id.widget_together_label);
         TextView count = root.findViewById(R.id.widget_together_count);
 
+        assertEquals(View.VISIBLE, label.getVisibility());
+        assertEquals("МЫ ВМЕСТЕ", label.getText().toString());
+        assertEquals(1, label.getLineCount());
+        assertNoEllipsis(label);
+        assertNoEllipsis(count);
+    }
+
+    @Test
+    public void remoteViewsHideLabelAndUseTinyFormatAtMinimumWidth() {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        View root = apply(context, 110, 40, FULL, COMPACT, TINY);
+        TextView label = root.findViewById(R.id.widget_together_label);
+        TextView count = root.findViewById(R.id.widget_together_count);
+
+        assertEquals(View.GONE, label.getVisibility());
         assertEquals(TINY, count.getText().toString());
         assertEquals(1, count.getLineCount());
         assertNoEllipsis(count);
@@ -120,6 +142,7 @@ public class TogetherWidgetInstrumentedTest {
 
         for (int width : widths) {
             View root = apply(context, width, 40, FULL, COMPACT, TINY);
+            TextView label = root.findViewById(R.id.widget_together_label);
             TextView count = root.findViewById(R.id.widget_together_count);
 
             assertEquals("Widget grew past one cell at " + width + "dp",
@@ -129,6 +152,13 @@ public class TogetherWidgetInstrumentedTest {
             assertTrue("Count overflowed horizontally at " + width + "dp",
                     count.getRight() <= root.getWidth() + 1);
             assertNoEllipsis(count);
+
+            if (label.getVisibility() == View.VISIBLE) {
+                assertEquals(1, label.getLineCount());
+                assertTrue("Label overflowed horizontally at " + width + "dp",
+                        label.getRight() <= root.getWidth() + 1);
+                assertNoEllipsis(label);
+            }
         }
     }
 

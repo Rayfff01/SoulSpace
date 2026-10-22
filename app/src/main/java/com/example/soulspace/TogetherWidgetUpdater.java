@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextPaint;
 import android.util.DisplayMetrics;
+import android.view.View;
 import android.widget.RemoteViews;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -46,8 +47,12 @@ final class TogetherWidgetUpdater {
     private static final int DEFAULT_WIDTH_DP = 180;
     private static final float COUNT_TEXT_SIZE_SP = 16f;
     private static final float HEART_TEXT_SIZE_SP = 14f;
+    private static final float LABEL_TEXT_SIZE_SP = 9f;
+    private static final float LABEL_LETTER_SPACING = 0.08f;
     private static final int HORIZONTAL_PADDING_DP = 8;
-    private static final int HEART_MARGIN_DP = 3;
+    private static final int LABEL_HORIZONTAL_PADDING_DP = 3;
+    private static final int LABEL_MARGIN_DP = 5;
+    private static final int COUNT_MARGIN_DP = 6;
     private static final int WIDTH_SAFETY_DP = 1;
 
     private TogetherWidgetUpdater() {
@@ -105,8 +110,13 @@ final class TogetherWidgetUpdater {
     }
 
     static RemoteViews createViews(Context context, int widthDp, TextVariants variants) {
-        String count = chooseCountText(context, widthDp, variants);
+        boolean showLabel = shouldShowLabel(context, widthDp, variants);
+        String count = chooseCountText(context, widthDp, variants, showLabel);
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_together);
+        views.setTextViewText(R.id.widget_together_label,
+                context.getString(R.string.widget_together_label));
+        views.setViewVisibility(R.id.widget_together_label,
+                showLabel ? View.VISIBLE : View.GONE);
         views.setTextViewText(R.id.widget_together_count, count);
         views.setInt(R.id.widget_together_count, "setMaxLines", 1);
         return views;
@@ -155,12 +165,15 @@ final class TogetherWidgetUpdater {
                 TogetherWidgetDuration.formatDurationTiny(startDate, today));
     }
 
-    private static String chooseCountText(Context context, int widthDp, TextVariants variants) {
+    private static String chooseCountText(Context context,
+                                          int widthDp,
+                                          TextVariants variants,
+                                          boolean showLabel) {
         if (variants == null) {
             return "";
         }
 
-        float availableWidthPx = availableTextWidthPx(context, widthDp);
+        float availableWidthPx = availableTextWidthPx(context, widthDp, showLabel);
         TextPaint paint = countPaint(context);
 
         if (fits(paint, variants.full, availableWidthPx)) {
@@ -172,23 +185,40 @@ final class TogetherWidgetUpdater {
         return variants.tiny;
     }
 
+    private static boolean shouldShowLabel(Context context, int widthDp, TextVariants variants) {
+        if (variants == null || variants.tiny == null || variants.tiny.isEmpty()) {
+            return false;
+        }
+
+        float availableWithLabel = availableTextWidthPx(context, widthDp, true);
+        return availableWithLabel > 0f
+                && fits(countPaint(context), variants.tiny, availableWithLabel);
+    }
+
     private static boolean fits(TextPaint paint, String text, float availableWidthPx) {
         return text != null
                 && !text.isEmpty()
                 && paint.measureText(text) <= availableWidthPx;
     }
 
-    private static float availableTextWidthPx(Context context, int widthDp) {
+    private static float availableTextWidthPx(Context context,
+                                              int widthDp,
+                                              boolean showLabel) {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         int safeWidthDp = widthDp > 0 ? widthDp : DEFAULT_WIDTH_DP;
         float density = metrics.density;
 
-        return Math.max(0f,
-                safeWidthDp * density
-                        - 2f * HORIZONTAL_PADDING_DP * density
-                        - HEART_MARGIN_DP * density
-                        - heartWidthPx(context)
-                        - WIDTH_SAFETY_DP * density);
+        float available = safeWidthDp * density
+                - 2f * HORIZONTAL_PADDING_DP * density
+                - COUNT_MARGIN_DP * density
+                - heartWidthPx(context)
+                - WIDTH_SAFETY_DP * density;
+
+        if (showLabel) {
+            available -= LABEL_MARGIN_DP * density + labelWidthPx(context);
+        }
+
+        return Math.max(0f, available);
     }
 
     private static float heartWidthPx(Context context) {
@@ -197,6 +227,22 @@ final class TogetherWidgetUpdater {
         paint.setTypeface(Typeface.DEFAULT);
         paint.setTextSize(HEART_TEXT_SIZE_SP * metrics.scaledDensity);
         return paint.measureText(context.getString(R.string.widget_together_heart));
+    }
+
+    private static float labelWidthPx(Context context) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        TextPaint paint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
+        paint.setTextSize(LABEL_TEXT_SIZE_SP * metrics.scaledDensity);
+
+        String label = context.getString(R.string.widget_together_label);
+        float letterSpacingPx = LABEL_LETTER_SPACING
+                * LABEL_TEXT_SIZE_SP
+                * metrics.scaledDensity;
+
+        return paint.measureText(label)
+                + letterSpacingPx * label.length()
+                + 2f * LABEL_HORIZONTAL_PADDING_DP * metrics.density;
     }
 
     private static TextPaint countPaint(Context context) {

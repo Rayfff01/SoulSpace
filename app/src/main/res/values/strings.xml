@@ -13,6 +13,7 @@
     <string name="widget_together_heart">♥</string>
     <string name="widget_together_calendar_icon">📅</string>
     <string name="widget_together_description">Счётчик продолжительности ваших отношений</string>
+    <string name="widget_together_label">МЫ ВМЕСТЕ</string>
     <string name="widget_together_no_date">Укажи дату начала отношений</string>
     <string name="widget_together_no_date_short">Укажи дату начала</string>
     <string name="widget_together_no_date_tiny">Нет даты</string>
@@ -21,7 +22,7 @@
     <string name="widget_together_future">До нашей даты: %1$s</string>
     <string name="widget_together_future_short">До даты: %1$s</string>
     <string name="widget_together_future_tiny">До %1$s</string>
-    <string name="widget_together_preview_count">1 год · 3 мес. · 12 дн.</string>
+    <string name="widget_together_preview_count">1г3м12д</string>
 
     <string name="widget_together_configure_title">Сколько мы вместе</string>
     <string name="widget_together_configure_subtitle">Выбери дату начала отношений — виджет будет считать, сколько вы уже вместе.</string>
